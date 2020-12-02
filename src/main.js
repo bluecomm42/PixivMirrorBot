@@ -1,4 +1,5 @@
 import { version } from "./config.js";
+import "./web.js";
 import mirror from "./pixiv-mirror.js";
 import { alreadyReplied, buildComment } from "./util.js";
 

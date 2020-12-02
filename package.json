@@ -18,6 +18,7 @@
     "bluebird": "^3.7.2",
     "dotenv": "^8.2.0",
     "ent": "^2.2.0",
+    "express": "^4.17.1",
     "form-data": "^3.0.0",
     "got": "^11.8.0",
     "pixiv-app-api": "git+https://github.com/Sn0wCrack/pixiv-app-api.git#8f0c7d3465f7f2273fa8dfd1be29537ad2111428",
