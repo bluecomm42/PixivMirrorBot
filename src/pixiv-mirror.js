@@ -26,7 +26,10 @@ export default async function mirror(id) {
   const { title, caption, urls, nsfw } = await pixiv.illust(id);
 
   // Only NSFW content is behind an account wall, so only mirror that.
-  if (!nsfw) return null;
+  if (!nsfw) {
+    console.log(`[${id}] Post is not blocked by an account wall, skipping`);
+    return null;
+  }
 
   const attribution = `Mirror of https://pixiv.net/artworks/${id}`;
   const description = buildDescription(caption, attribution);
