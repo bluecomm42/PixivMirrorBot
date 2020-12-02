@@ -3,6 +3,7 @@ import "./web.js";
 import mirror from "./pixiv-mirror.js";
 import { alreadyReplied, buildComment } from "./util.js";
 
+import dedupe from "dedupe";
 import Promise from "bluebird";
 import Snoowrap from "snoowrap";
 import { CommentStream, SubmissionStream } from "snoostorm";
@@ -45,10 +46,12 @@ posts.on("item", async (post) => {
 
 const comments = new CommentStream(client, streamOpts);
 comments.on("item", async (comment) => {
-  const ids = Array.from(comment.body.matchAll(commentRegex), (m) => m[1]);
-  if (ids.length === 0) return;
+  const matches = comment.body.matchAll(commentRegex);
+  const foundIds = Array.from(matches, (m) => parseInt(m[1]));
+  if (foundIds.length === 0) return;
   if (await alreadyReplied(comment)) return;
 
+  const ids = dedupe(foundIds);
   const albums = await Promise.resolve(ids)
     .map(mirror)
     .filter((e) => e != null);
