@@ -22,14 +22,18 @@ function buildDescription(caption, attribution) {
  * @returns {string} The url of the newly created Imgur mirror.
  */
 export default async function mirror(id) {
-  console.log("Fetching post...");
-  const { title, caption, urls } = await pixiv.illust(id);
+  console.log(`[${id}] Fetching post...`);
+  const { title, caption, urls, nsfw } = await pixiv.illust(id);
+
+  // Only NSFW content is behind an account wall, so only mirror that.
+  if (!nsfw) return null;
+
   const attribution = `Mirror of https://pixiv.net/artworks/${id}`;
   const description = buildDescription(caption, attribution);
 
   const hashes = [];
   for (let i = 0; i < urls.length; ++i) {
-    console.log(`Mirroring image ${i + 1}/${urls.length}...`);
+    console.log(`[${id}] Mirroring image ${i + 1}/${urls.length}...`);
     const img = await pixiv.downloadImage(urls[i]);
     // Only add the description to the first image in the album.
     const desc = i === 0 ? description : null;
@@ -37,7 +41,7 @@ export default async function mirror(id) {
     hashes.push(deletehash);
   }
 
-  console.log("Creating album...");
+  console.log(`[${id}] Creating album...`);
   const album = await imgur.createAlbum(title, attribution, hashes);
 
   return `https://imgur.com/a/${album.id}`;

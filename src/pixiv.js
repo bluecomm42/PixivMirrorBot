@@ -15,6 +15,7 @@ const pixiv = new PixivAppApi(
  * @property {string} title The title of the post.
  * @property {string} caption The formatted caption of the post.
  * @property {string[]} urls The extracted image URLs.
+ * @property {boolean} nsfw Whether or not the post is 18+.
  */
 
 /**
@@ -65,6 +66,7 @@ export async function illust(id) {
     title: illust.title,
     caption: formatCaption(illust.caption),
     urls: extractUrls(illust),
+    nsfw: !!illust.xRestrict,
   };
 }
 
