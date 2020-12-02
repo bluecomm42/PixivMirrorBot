@@ -11,6 +11,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=14.15.1"
+  },
   "dependencies": {
     "bluebird": "^3.7.2",
     "dotenv": "^8.2.0",
