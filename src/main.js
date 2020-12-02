@@ -34,8 +34,6 @@ posts.on("item", async (post) => {
   if (await alreadyReplied(post)) return;
 
   const id = parseInt(m[1]);
-  if (isNaN(id)) return;
-
   const album = await mirror(id);
   if (album == null) return;
 
