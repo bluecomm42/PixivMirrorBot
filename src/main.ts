@@ -1,18 +1,13 @@
-import log from "./logger.js";
-
+// This import must be first to ensure that environment variables are set up.
 import { version } from "./config.js";
+
 import "./web.js";
-import mirror from "./pixiv-mirror.js";
-import { init as dbInit } from "./database.js";
-import { alreadyReplied, buildComment, dedupe } from "./util.js";
-
-import Promise from "bluebird";
+import log from "./logger.js";
 import Snoowrap from "snoowrap";
+import processComment from "./process/comment.js";
+import processPost from "./process/post.js";
+import { init as dbInit } from "./database.js";
 import { CommentStream, SubmissionStream } from "snoostorm";
-
-const regexBase = "https?://(?:www\\.)?pixiv\\.net/(?:\\w+/)?artworks/(\\d+)";
-const commentRegex = new RegExp(regexBase, "g");
-const postRegex = new RegExp(`^${regexBase}`);
 
 const streamOpts = {
   subreddit: "BluesTestingGround",
@@ -33,38 +28,8 @@ client.config({ continueAfterRatelimitError: true });
   await dbInit();
 
   const posts = new SubmissionStream(client, streamOpts);
-  posts.on("item", async (post) => {
-    // TODO: Add logging
-    const m = post.url.match(postRegex);
-    if (m == null) return;
-    if (await alreadyReplied(post)) return;
-
-    const id = parseInt(m[1]);
-    const album = await mirror(id);
-    if (album == null) return;
-
-    const msg = buildComment([album]);
-    // @ts-ignore: Pending not-an-aardvark/snoowrap#221
-    const reply = await post.reply(msg);
-    await reply.distinguish({ status: true, sticky: true });
-  });
+  posts.on("item", processPost);
 
   const comments = new CommentStream(client, streamOpts);
-  comments.on("item", async (comment) => {
-    // TODO: Add logging
-    const matches = comment.body.matchAll(commentRegex);
-    const foundIds = Array.from(matches, (m) => parseInt(m[1]));
-    if (foundIds.length === 0) return;
-    if (await alreadyReplied(comment)) return;
-
-    const ids = dedupe(foundIds);
-    const albums = await Promise.resolve(ids)
-      .map(mirror)
-      .filter((e) => e != null);
-    if (albums.length === 0) return;
-
-    const msg = buildComment(albums);
-    // @ts-ignore: Pending not-an-aardvark/snoowrap#221
-    await comment.reply(msg);
-  });
+  comments.on("item", processComment);
 })();

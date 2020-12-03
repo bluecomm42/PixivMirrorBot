@@ -5,6 +5,9 @@ class Replyable {
   replies?: Listing<Comment>;
 }
 
+export const regexBase =
+  "https?://(?:www\\.)?pixiv\\.net/(?:\\w+/)?artworks/(\\d+)";
+
 /**
  * Check if the bot has already replied to a given post/comment.
  *
