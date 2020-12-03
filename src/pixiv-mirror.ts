@@ -1,5 +1,4 @@
 import { sublog } from "./logger.js";
-import { v4 as uuid } from "uuid";
 import pixiv from "./pixiv.js";
 import imgur from "./imgur.js";
 import { getAlbum, cacheAlbum } from "./database.js";
@@ -27,7 +26,7 @@ function buildDescription(caption: string, attribution: string): string {
  * @returns The url of the newly created Imgur mirror.
  */
 export default async function mirror(id: number): Promise<string> {
-  const log = logger.child({ id, uuid: uuid() });
+  const log = logger.child({ pixiv_id: id });
   log.info("Mirroring post");
 
   // If the post was already mirrored, just use that one.

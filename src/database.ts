@@ -1,5 +1,4 @@
 import { sublog } from "./logger.js";
-import { v4 as uuid } from "uuid";
 import pg from "pg";
 
 const logger = sublog("database");
@@ -13,7 +12,7 @@ const pool = new pg.Pool({
  * Initalize the database, if needed.
  */
 export async function init(): Promise<void> {
-  let log = logger.child({ action: "init table", uuid: uuid() });
+  let log = logger.child({ action: "init table" });
   log.info("Initalizing table");
   await pool.query(`
     CREATE TABLE IF NOT EXISTS mirrors (
@@ -33,7 +32,7 @@ export async function init(): Promise<void> {
  * @returns The id of the mirrored album, or null if no mirror exists yet.
  */
 export async function getAlbum(id: number): Promise<string | null> {
-  let log = logger.child({ action: "fetch album", id, uuid: uuid() });
+  let log = logger.child({ action: "fetch album", pixiv_id: id });
   log.info("Starting fetch");
   const query = "SELECT album_id FROM mirrors WHERE id = $1";
   const res = await pool.query(query, [id]);
@@ -63,7 +62,6 @@ export async function cacheAlbum(
     id,
     albumId,
     deletehash,
-    uuid: uuid(),
   });
   log.info("Saving to database");
   const query =

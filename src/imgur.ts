@@ -1,5 +1,4 @@
 import { sublog } from "./logger.js";
-import { v4 as uuid } from "uuid";
 import got from "got";
 import FormData from "form-data";
 
@@ -35,8 +34,8 @@ export async function createAlbum(
   description: string,
   images: string[]
 ): Promise<ImgurAlbum> {
-  const log = logger.child({ action: "create album", uuid: uuid() });
   log.info({ title, description, images }, "Creating album");
+  const log = logger.child({ action: "create album" });
 
   const form = new FormData();
   form.append("title", title);
@@ -60,11 +59,7 @@ export async function createAlbum(
  * @param deletehash The deletehash of the album to delete.
  */
 export async function deleteAlbum(deletehash: string): Promise<void> {
-  const log = logger.child({
-    action: "delete album",
-    deletehash,
-    uuid: uuid(),
-  });
+  const log = logger.child({ action: "delete album", deletehash });
   log.info("Deleting album");
   await got.delete(`https://api.imgur.com/3/album/${deletehash}`, { headers });
   log.info("Successfully deleted album");
@@ -82,8 +77,8 @@ export async function uploadImage(
   data: Buffer,
   description?: string
 ): Promise<ImgurImage> {
-  const log = logger.child({ action: "upload image", uuid: uuid() });
   log.info({ description }, "Uploading new image");
+  const log = logger.child({ action: "upload image" });
 
   const form = new FormData();
   form.append("image", data, { filename: "image.png" });
