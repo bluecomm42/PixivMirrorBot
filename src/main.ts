@@ -1,6 +1,7 @@
 import { version } from "./config.js";
 import "./web.js";
 import mirror from "./pixiv-mirror.js";
+import { init as dbInit } from "./database.js";
 import { alreadyReplied, buildComment, dedupe } from "./util.js";
 
 import Promise from "bluebird";
@@ -16,7 +17,6 @@ const streamOpts = {
   pollTime: 10000, // Every 10 minutes, to start
 };
 
-console.log(`Starting PixivMirrorBot v${version}...`);
 const client = new Snoowrap({
   userAgent: `bot:PixivMirrorBot:${version} (by /u/bluecomm403)`,
   clientId: process.env.REDDIT_CLIENT,
@@ -26,36 +26,41 @@ const client = new Snoowrap({
 });
 client.config({ continueAfterRatelimitError: true });
 
-const posts = new SubmissionStream(client, streamOpts);
-posts.on("item", async (post) => {
-  const m = post.url.match(postRegex);
-  if (m == null) return;
-  if (await alreadyReplied(post)) return;
+(async () => {
+  console.log(`Starting PixivMirrorBot v${version}...`);
+  await dbInit();
 
-  const id = parseInt(m[1]);
-  const album = await mirror(id);
-  if (album == null) return;
+  const posts = new SubmissionStream(client, streamOpts);
+  posts.on("item", async (post) => {
+    const m = post.url.match(postRegex);
+    if (m == null) return;
+    if (await alreadyReplied(post)) return;
 
-  const msg = buildComment([album]);
-  // @ts-ignore: Pending not-an-aardvark/snoowrap#221
-  const reply = await post.reply(msg);
-  await reply.distinguish({ status: true, sticky: true });
-});
+    const id = parseInt(m[1]);
+    const album = await mirror(id);
+    if (album == null) return;
 
-const comments = new CommentStream(client, streamOpts);
-comments.on("item", async (comment) => {
-  const matches = comment.body.matchAll(commentRegex);
-  const foundIds = Array.from(matches, (m) => parseInt(m[1]));
-  if (foundIds.length === 0) return;
-  if (await alreadyReplied(comment)) return;
+    const msg = buildComment([album]);
+    // @ts-ignore: Pending not-an-aardvark/snoowrap#221
+    const reply = await post.reply(msg);
+    await reply.distinguish({ status: true, sticky: true });
+  });
 
-  const ids = dedupe(foundIds);
-  const albums = await Promise.resolve(ids)
-    .map(mirror)
-    .filter((e) => e != null);
-  if (albums.length === 0) return;
+  const comments = new CommentStream(client, streamOpts);
+  comments.on("item", async (comment) => {
+    const matches = comment.body.matchAll(commentRegex);
+    const foundIds = Array.from(matches, (m) => parseInt(m[1]));
+    if (foundIds.length === 0) return;
+    if (await alreadyReplied(comment)) return;
 
-  const msg = buildComment(albums);
-  // @ts-ignore: Pending not-an-aardvark/snoowrap#221
-  await comment.reply(msg);
-});
+    const ids = dedupe(foundIds);
+    const albums = await Promise.resolve(ids)
+      .map(mirror)
+      .filter((e) => e != null);
+    if (albums.length === 0) return;
+
+    const msg = buildComment(albums);
+    // @ts-ignore: Pending not-an-aardvark/snoowrap#221
+    await comment.reply(msg);
+  });
+})();

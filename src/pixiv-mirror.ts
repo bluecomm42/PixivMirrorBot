@@ -1,5 +1,6 @@
 import pixiv from "./pixiv.js";
 import imgur from "./imgur.js";
+import { getAlbum, cacheAlbum } from "./database.js";
 
 /**
  * Build a description for an Imgur mirror
@@ -22,6 +23,10 @@ function buildDescription(caption: string, attribution: string): string {
  * @returns The url of the newly created Imgur mirror.
  */
 export default async function mirror(id: number): Promise<string> {
+  // If the post was already mirrored, just use that one.
+  const cached = await getAlbum(id);
+  if (!!cached) return `https://imgur.com/a/${cached}`;
+
   console.log(`[${id}] Fetching post...`);
   const { title, caption, urls, nsfw } = await pixiv.illust(id);
 
@@ -47,5 +52,19 @@ export default async function mirror(id: number): Promise<string> {
   console.log(`[${id}] Creating album...`);
   const album = await imgur.createAlbum(title, attribution, hashes);
 
-  return `https://imgur.com/a/${album.id}`;
+  try {
+    await cacheAlbum(id, album.id, album.deletehash);
+    return `https://imgur.com/a/${album.id}`;
+  } catch (e) {
+    if (e && e.constraint === "mirrors_pkey") {
+      console.log(`Already mirrored the album ${id}. Whoops!`);
+    } else {
+      console.log(`Unable to cache album ${id}:`);
+      console.log(e);
+    }
+
+    // Something went wrong, clean up and abort.
+    imgur.deleteAlbum(album.deletehash);
+    return null;
+  }
 }
