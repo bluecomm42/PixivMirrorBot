@@ -20,7 +20,7 @@ const streamOpts = {
 };
 
 const client = new Snoowrap({
-  userAgent: `bot:PixivMirrorBot:${version} (by /u/bluecomm403)`,
+  userAgent: `bot:${process.env.REDDIT_USER}:${version} (by /u/bluecomm403)`,
   clientId: process.env.REDDIT_CLIENT,
   clientSecret: process.env.REDDIT_SECRET,
   username: process.env.REDDIT_USER,
