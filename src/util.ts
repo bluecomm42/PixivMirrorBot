@@ -6,7 +6,7 @@ class Replyable {
 }
 
 export const regexBase =
-  "https?://(?:www\\.)?pixiv\\.net/(?:\\w+/)?artworks/(\\d+)";
+  "https?://(?:www\\.)?pixiv\\.net/(?:(?:\\w+/)?artworks/|member_illust\\.php\\?.*?illust_id=)(\\d+)";
 
 /**
  * Check if the bot has already replied to a given post/comment.
