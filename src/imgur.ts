@@ -44,6 +44,17 @@ export async function createAlbum(
 }
 
 /**
+ * Delete a given imgur album.
+ *
+ * @param deletehash The deletehash of the album to delete.
+ */
+export async function deleteAlbum(deletehash: string): Promise<void> {
+  console.log(`Deleting album ${deletehash}...`);
+  await got.delete(`https://api.imgur.com/3/album/${deletehash}`, { headers });
+  console.log(`Deleted album ${deletehash}`);
+}
+
+/**
  * Upload an image to Imgur
  *
  * @param data The raw image data.
@@ -69,5 +80,6 @@ export async function uploadImage(
 
 export default {
   createAlbum,
+  deleteAlbum,
   uploadImage,
 };
