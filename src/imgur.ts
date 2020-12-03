@@ -48,7 +48,7 @@ export async function createAlbum(
     .post("https://api.imgur.com/3/album", { body: form, headers })
     .json();
 
-  // @ts-ignore: Pending sindresorhus/got#1548
+  // @ts-expect-error: Pending sindresorhus/got#1548
   const album: ImgurAlbum = res.data;
   log.info(album, "Successfully created album");
   return album;
@@ -95,7 +95,7 @@ export async function uploadImage(
     .json();
 
   log.info("Successfully uploaded image");
-  // @ts-ignore: Pending sindresorhus/got#1548
+  // @ts-expect-error: Pending sindresorhus/got#1548
   return res.data;
 }
 
