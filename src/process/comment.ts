@@ -1,7 +1,13 @@
 import logger from "../logger.js";
 import mirror from "../pixiv-mirror.js";
 import Bluebird from "bluebird";
-import { alreadyReplied, buildComment, dedupe, regexBase } from "../util.js";
+import {
+  alreadyReplied,
+  buildComment,
+  dedupe,
+  myComment,
+  regexBase,
+} from "../util.js";
 import { Comment } from "snoowrap";
 
 const commentRegex = new RegExp(regexBase, "g");
@@ -12,6 +18,9 @@ const commentRegex = new RegExp(regexBase, "g");
  * @param comment The comment to process.
  */
 export default async function processComment(comment: Comment): Promise<void> {
+  // Ignore any comments made by this bot to avoid accidental loops.
+  if (myComment(comment)) return;
+
   const log = logger.child({ comment: comment.id });
   log.info("Processing comment");
 

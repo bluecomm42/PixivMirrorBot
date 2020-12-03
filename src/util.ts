@@ -9,6 +9,16 @@ export const regexBase =
   "https?://(?:www\\.)?pixiv\\.net/(?:(?:\\w+/)?artworks/|member_illust\\.php\\?.*?illust_id=)(\\d+)";
 
 /**
+ * Check whether or not a particular comment was made by this bot.
+ *
+ * @param c The comment to check.
+ *
+ * @returns Whether or not the comment was made by this bot.
+ */
+export function myComment(c: Comment): boolean {
+  return c.author.name === process.env.REDDIT_USER;
+}
+/**
  * Check if the bot has already replied to a given post/comment.
  *
  * @param content The post/comment to check replies of.
@@ -20,7 +30,7 @@ export async function alreadyReplied<T>(
 ): Promise<boolean> {
   const e: Replyable = await content.expandReplies({ depth: 1 });
   const r = e.comments || e.replies;
-  return r.some((c: Comment) => c.author.name === process.env.REDDIT_USER);
+  return r.some(myComment);
 }
 
 /**
