@@ -20,7 +20,7 @@ export default async function processPost(post: Submission): Promise<void> {
   }
   const m = post.url.match(postRegex);
   if (m == null) {
-    log.info({ postUrl: post.url }, "Post url isn't Pixiv");
+    log.info("Post url isn't Pixiv", { postUrl: post.url });
     return;
   }
   if (await alreadyReplied(post)) {
@@ -38,7 +38,7 @@ export default async function processPost(post: Submission): Promise<void> {
   const msg = buildComment([album]);
   // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
   const reply = await post.reply(msg);
-  log.info({ replyId: reply.id }, "Successfuly replied to post");
+  log.info("Successfuly replied to post", { replyId: reply.id });
 
   await reply.distinguish({ status: true, sticky: true });
 }

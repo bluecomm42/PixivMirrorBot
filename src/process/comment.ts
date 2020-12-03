@@ -32,7 +32,7 @@ export default async function processComment(comment: Comment): Promise<void> {
   }
 
   const ids = dedupe(foundIds);
-  log.info({ matches: ids }, "Processing matches");
+  log.info("Processing matches", { matches: ids });
 
   const albums = await Bluebird.resolve(ids)
     .map(mirror)
@@ -46,5 +46,5 @@ export default async function processComment(comment: Comment): Promise<void> {
   const msg = buildComment(albums);
   // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
   const reply = await comment.reply(msg);
-  log.info({ replyId: reply.id }, "Successfuly replied to post");
+  log.info("Successfuly replied to post", { replyId: reply.id });
 }

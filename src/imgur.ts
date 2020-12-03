@@ -34,8 +34,8 @@ export async function createAlbum(
   description: string,
   images: string[]
 ): Promise<ImgurAlbum> {
-  log.info({ title, description, images }, "Creating album");
   const log = logger.child({ action: "create album" });
+  log.info("Creating album", { title, description, images });
 
   const form = new FormData();
   form.append("title", title);
@@ -49,7 +49,7 @@ export async function createAlbum(
 
   // @ts-expect-error: Pending sindresorhus/got#1548
   const album: ImgurAlbum = res.data;
-  log.info(album, "Successfully created album");
+  log.info("Successfully created album", album);
   return album;
 }
 
@@ -77,8 +77,8 @@ export async function uploadImage(
   data: Buffer,
   description?: string
 ): Promise<ImgurImage> {
-  log.info({ description }, "Uploading new image");
   const log = logger.child({ action: "upload image" });
+  log.info("Uploading new image", { description });
 
   const form = new FormData();
   form.append("image", data, { filename: "image.png" });

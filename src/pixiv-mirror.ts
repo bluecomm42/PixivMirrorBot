@@ -67,7 +67,7 @@ export default async function mirror(id: number): Promise<string> {
     if (e && e.constraint === "mirrors_pkey") {
       log.info(`Already mirrored the album ${id}. Whoops!`);
     } else {
-      log.error(e, "Unable to cache album");
+      log.error("Unable to cache album", e);
     }
 
     // Something went wrong, clean up and abort.
