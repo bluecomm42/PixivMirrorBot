@@ -2,7 +2,7 @@ import { sublog } from "./logger.js";
 import { v4 as uuid } from "uuid";
 import pg from "pg";
 
-const logger = sublog("db");
+const logger = sublog("database");
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,

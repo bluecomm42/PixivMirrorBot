@@ -4,7 +4,7 @@ import pixiv from "./pixiv.js";
 import imgur from "./imgur.js";
 import { getAlbum, cacheAlbum } from "./database.js";
 
-const logger = sublog("pixiv-mirror");
+const logger = sublog("mirror");
 
 /**
  * Build a description for an Imgur mirror
