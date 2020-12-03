@@ -1,6 +1,9 @@
 import logfmt from "logfmt";
 import { v4 as uuid } from "uuid";
 import { EventEmitter } from "events";
+import * as cls from "cls-hooked";
+
+const clsNamespace = cls.createNamespace("clsLoggerNamespace");
 
 /**
  * A logger object.
@@ -56,6 +59,12 @@ export class Logger {
 
     // Allow msg context to override parent context.
     context = { ...context, ...this.context };
+
+    // Add trace UUID, if present.
+    const trace_uuid = clsNamespace.get("trace_uuid");
+    if (trace_uuid != null) {
+      context = { ...context, trace_uuid };
+    }
 
     const data = logfmt.stringify(context);
     console.log(`[${lvl}] ${msg} ${data}`);
@@ -124,6 +133,18 @@ export class Logger {
 
 const log = new Logger();
 export default log;
+
+export function clsBind(...emitters: EventEmitter[]): void {
+  for (const emitter of emitters) {
+    clsNamespace.bindEmitter(emitter);
+  }
+}
+export async function clsWrap<T>(fn: () => Promise<T>): Promise<T> {
+  return clsNamespace.runPromise(() => {
+    clsNamespace.set("trace_uuid", uuid());
+    return fn();
+  });
+}
 
 /**
  * Make a new logger for a given subsystem.

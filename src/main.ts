@@ -2,7 +2,7 @@
 import { version } from "./config.js";
 
 import "./web.js";
-import log from "./logger.js";
+import log, { clsWrap } from "./logger.js";
 import Snoowrap from "snoowrap";
 import processComment from "./process/comment.js";
 import processPost from "./process/post.js";
@@ -28,8 +28,8 @@ client.config({ continueAfterRatelimitError: true });
   await dbInit();
 
   const posts = new SubmissionStream(client, streamOpts);
-  posts.on("item", processPost);
+  posts.on("item", (p) => clsWrap(() => processPost(p)));
 
   const comments = new CommentStream(client, streamOpts);
-  comments.on("item", processComment);
+  comments.on("item", (c) => clsWrap(() => processComment(c)));
 })();
