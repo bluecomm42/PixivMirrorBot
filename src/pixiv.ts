@@ -1,6 +1,7 @@
 import PixivAppApi from "pixiv-app-api";
 import got from "got";
 import ent from "ent";
+import { PixivIllust } from "pixiv-app-api/dist/PixivTypes";
 
 let authed = false;
 const headers = { referer: "https://pixiv.net/" };
@@ -10,22 +11,26 @@ const pixiv = new PixivAppApi(
   { camelcaseKeys: true }
 );
 
-/**
- * @typedef {Object} PixivPost
- * @property {string} title The title of the post.
- * @property {string} caption The formatted caption of the post.
- * @property {string[]} urls The extracted image URLs.
- * @property {boolean} nsfw Whether or not the post is 18+.
- */
+/** A simplified Pixiv post. */
+interface PixivPost {
+  /** The title of the post. */
+  title: string;
+  /** The caption of the post. */
+  caption: string;
+  /** The image urls. */
+  urls: string[];
+  /** Whether or not the post is 18+ */
+  nsfw: boolean;
+}
 
 /**
  * Extract a uniform array of image urls from a pixiv post.
  *
- * @param {PixivIllust} illust The pixiv post to extract urls from.
+ * @param illust The pixiv post to extract urls from.
  *
- * @returns {string[]} The array of extracted urls.
+ * @returns The array of extracted urls.
  */
-function extractUrls(illust) {
+function extractUrls(illust: PixivIllust): string[] {
   if (illust.metaPages.length > 0) {
     return illust.metaPages.map((p) => p.imageUrls.original);
   } else {
@@ -36,11 +41,11 @@ function extractUrls(illust) {
 /**
  * Format a Pixiv caption.
  *
- * @param {string} caption The caption to format.
+ * @param caption The caption to format.
  *
- * @returns {string} The formatted caption.
+ * @returns The formatted caption.
  */
-function formatCaption(caption) {
+function formatCaption(caption: string): string {
   if (!caption) {
     return "";
   }
@@ -51,11 +56,11 @@ function formatCaption(caption) {
 /**
  * Extract relevant information from a Pixiv post.
  *
- * @param {number} id The ID of the pixiv post.
+ * @param id The ID of the pixiv post.
  *
- * @returns {PixivPost} The extracted pixiv post.
+ * @returns The extracted pixiv post.
  */
-export async function illust(id) {
+export async function illust(id: number): Promise<PixivPost> {
   if (!authed) {
     await pixiv.login();
     authed = true;
@@ -66,6 +71,7 @@ export async function illust(id) {
     title: illust.title,
     caption: formatCaption(illust.caption),
     urls: extractUrls(illust),
+    // @ts-ignore: Pending akameco/pixiv-app-api#43
     nsfw: !!illust.xRestrict,
   };
 }
@@ -73,11 +79,11 @@ export async function illust(id) {
 /**
  * Download an image from Pixiv.
  *
- * @param {string} url The URL of the image to download.
+ * @param url The URL of the image to download.
  *
- * @returns {Buffer} The downloaded image.
+ * @returns The downloaded image.
  */
-export async function downloadImage(url) {
+export async function downloadImage(url: string): Promise<Buffer> {
   return await got.get(url, { headers }).buffer();
 }
 

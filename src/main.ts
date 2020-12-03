@@ -1,9 +1,8 @@
 import { version } from "./config.js";
 import "./web.js";
 import mirror from "./pixiv-mirror.js";
-import { alreadyReplied, buildComment } from "./util.js";
+import { alreadyReplied, buildComment, dedupe } from "./util.js";
 
-import dedupe from "dedupe";
 import Promise from "bluebird";
 import Snoowrap from "snoowrap";
 import { CommentStream, SubmissionStream } from "snoostorm";
@@ -38,6 +37,7 @@ posts.on("item", async (post) => {
   if (album == null) return;
 
   const msg = buildComment([album]);
+  // @ts-ignore: Pending not-an-aardvark/snoowrap#221
   const reply = await post.reply(msg);
   await reply.distinguish({ status: true, sticky: true });
 });
@@ -56,5 +56,6 @@ comments.on("item", async (comment) => {
   if (albums.length === 0) return;
 
   const msg = buildComment(albums);
+  // @ts-ignore: Pending not-an-aardvark/snoowrap#221
   await comment.reply(msg);
 });

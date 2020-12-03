@@ -4,12 +4,12 @@ import imgur from "./imgur.js";
 /**
  * Build a description for an Imgur mirror
  *
- * @param {string} caption The caption of the Pixiv post.
- * @param {string} attribution The attribution of the Pixiv post.
+ * @param caption The caption of the Pixiv post.
+ * @param attribution The attribution of the Pixiv post.
  *
- * @returns {string} The constructed description.
+ * @returns The constructed description.
  */
-function buildDescription(caption, attribution) {
+function buildDescription(caption: string, attribution: string): string {
   const cap = caption ? `${caption}\n\n-----\n` : "";
   return cap + attribution;
 }
@@ -17,11 +17,11 @@ function buildDescription(caption, attribution) {
 /**
  * Mirror a Pixiv post to Imgur.
  *
- * @param {number} id The ID of the post to mirror.
+ * @param id The ID of the post to mirror.
  *
- * @returns {string} The url of the newly created Imgur mirror.
+ * @returns The url of the newly created Imgur mirror.
  */
-export default async function mirror(id) {
+export default async function mirror(id: number): Promise<string> {
   console.log(`[${id}] Fetching post...`);
   const { title, caption, urls, nsfw } = await pixiv.illust(id);
 
