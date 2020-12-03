@@ -1,5 +1,9 @@
+import { sublog } from "./logger.js";
+import { v4 as uuid } from "uuid";
 import got from "got";
 import FormData from "form-data";
+
+const logger = sublog("imgur");
 
 /** A simplified Imgur album object. */
 export interface ImgurAlbum {
@@ -31,16 +35,23 @@ export async function createAlbum(
   description: string,
   images: string[]
 ): Promise<ImgurAlbum> {
+  const log = logger.child({ action: "create album", uuid: uuid() });
+  log.info({ title, description, images }, "Creating album");
+
   const form = new FormData();
   form.append("title", title);
   form.append("description", description);
   form.append("privacy", "hidden");
   form.append("deletehashes", images.join(","));
+
   const res = await got
     .post("https://api.imgur.com/3/album", { body: form, headers })
     .json();
+
   // @ts-ignore: Pending sindresorhus/got#1548
-  return res.data;
+  const album: ImgurAlbum = res.data;
+  log.info(album, "Successfully created album");
+  return album;
 }
 
 /**
@@ -49,9 +60,14 @@ export async function createAlbum(
  * @param deletehash The deletehash of the album to delete.
  */
 export async function deleteAlbum(deletehash: string): Promise<void> {
-  console.log(`Deleting album ${deletehash}...`);
+  const log = logger.child({
+    action: "delete album",
+    deletehash,
+    uuid: uuid(),
+  });
+  log.info("Deleting album");
   await got.delete(`https://api.imgur.com/3/album/${deletehash}`, { headers });
-  console.log(`Deleted album ${deletehash}`);
+  log.info("Successfully deleted album");
 }
 
 /**
@@ -66,6 +82,9 @@ export async function uploadImage(
   data: Buffer,
   description?: string
 ): Promise<ImgurImage> {
+  const log = logger.child({ action: "upload image", uuid: uuid() });
+  log.info({ description }, "Uploading new image");
+
   const form = new FormData();
   form.append("image", data, { filename: "image.png" });
   if (!!description) {
@@ -74,6 +93,8 @@ export async function uploadImage(
   const res = await got
     .post("https://api.imgur.com/3/upload", { body: form, headers })
     .json();
+
+  log.info("Successfully uploaded image");
   // @ts-ignore: Pending sindresorhus/got#1548
   return res.data;
 }

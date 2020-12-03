@@ -1,6 +1,10 @@
+import { sublog } from "./logger.js";
+import { v4 as uuid } from "uuid";
 import pixiv from "./pixiv.js";
 import imgur from "./imgur.js";
 import { getAlbum, cacheAlbum } from "./database.js";
+
+const logger = sublog("pixiv-mirror");
 
 /**
  * Build a description for an Imgur mirror
@@ -23,25 +27,31 @@ function buildDescription(caption: string, attribution: string): string {
  * @returns The url of the newly created Imgur mirror.
  */
 export default async function mirror(id: number): Promise<string> {
+  const log = logger.child({ id, uuid: uuid() });
+  log.info("Mirroring post");
+
   // If the post was already mirrored, just use that one.
   const cached = await getAlbum(id);
-  if (!!cached) return `https://imgur.com/a/${cached}`;
+  if (!!cached) {
+    log.info("Cached mirror found");
+    return `https://imgur.com/a/${cached}`;
+  }
 
-  console.log(`[${id}] Fetching post...`);
+  log.info("No cached mirror found");
   const { title, caption, urls, nsfw } = await pixiv.illust(id);
 
   // Only NSFW content is behind an account wall, so only mirror that.
   if (!nsfw) {
-    console.log(`[${id}] Post is not blocked by an account wall, skipping`);
+    log.info("Post is not blocked by an account wall");
     return null;
   }
 
-  const attribution = `Mirror of https://pixiv.net/artworks/${id}`;
+  const attribution = `Automatic mirror of https://pixiv.net/artworks/${id} by u/${process.env.REDDIT_USER}`;
   const description = buildDescription(caption, attribution);
 
   const hashes = [];
   for (let i = 0; i < urls.length; ++i) {
-    console.log(`[${id}] Mirroring image ${i + 1}/${urls.length}...`);
+    log.info(`Mirroring image ${i + 1}/${urls.length}`);
     const img = await pixiv.downloadImage(urls[i]);
     // Only add the description to the first image in the album.
     const desc = i === 0 ? description : null;
@@ -49,7 +59,6 @@ export default async function mirror(id: number): Promise<string> {
     hashes.push(deletehash);
   }
 
-  console.log(`[${id}] Creating album...`);
   const album = await imgur.createAlbum(title, attribution, hashes);
 
   try {
@@ -57,10 +66,9 @@ export default async function mirror(id: number): Promise<string> {
     return `https://imgur.com/a/${album.id}`;
   } catch (e) {
     if (e && e.constraint === "mirrors_pkey") {
-      console.log(`Already mirrored the album ${id}. Whoops!`);
+      log.info(`Already mirrored the album ${id}. Whoops!`);
     } else {
-      console.log(`Unable to cache album ${id}:`);
-      console.log(e);
+      log.error(e, "Unable to cache album");
     }
 
     // Something went wrong, clean up and abort.

@@ -1,3 +1,5 @@
+import log from "./logger.js";
+
 import { version } from "./config.js";
 import "./web.js";
 import mirror from "./pixiv-mirror.js";
@@ -27,11 +29,12 @@ const client = new Snoowrap({
 client.config({ continueAfterRatelimitError: true });
 
 (async () => {
-  console.log(`Starting PixivMirrorBot v${version}...`);
+  log.info(`Starting PixivMirrorBot v${version}`);
   await dbInit();
 
   const posts = new SubmissionStream(client, streamOpts);
   posts.on("item", async (post) => {
+    // TODO: Add logging
     const m = post.url.match(postRegex);
     if (m == null) return;
     if (await alreadyReplied(post)) return;
@@ -48,6 +51,7 @@ client.config({ continueAfterRatelimitError: true });
 
   const comments = new CommentStream(client, streamOpts);
   comments.on("item", async (comment) => {
+    // TODO: Add logging
     const matches = comment.body.matchAll(commentRegex);
     const foundIds = Array.from(matches, (m) => parseInt(m[1]));
     if (foundIds.length === 0) return;

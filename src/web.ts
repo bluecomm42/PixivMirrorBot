@@ -1,4 +1,7 @@
+import { sublog } from "./logger.js";
 import express from "express";
+
+const logger = sublog("webserver");
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -10,5 +13,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Webserver started on port ${port}`);
+  logger.info(`Webserver started on port ${port}`);
 });
