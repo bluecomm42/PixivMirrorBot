@@ -3,7 +3,7 @@ import mirror from "../pixiv-mirror.js";
 import { alreadyReplied, buildComment, regexBase } from "../util.js";
 import { Submission } from "snoowrap";
 
-const postRegex = new RegExp(`^${regexBase}`);
+const postRegex = new RegExp(`^${regexBase.source}`);
 
 /**
  * Process a post.

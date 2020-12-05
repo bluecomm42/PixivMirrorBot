@@ -5,8 +5,8 @@ class Replyable {
   replies?: Listing<Comment>;
 }
 
-export const regexBase =
-  "https?://(?:www\\.)?pixiv\\.net/(?:(?:\\w+/)?artworks/|member_illust\\.php\\?.*?illust_id=)(\\d+)";
+// Test link: regexr.com/5hoq5
+export const regexBase = /https?:\/\/(?:(?:www\.)?pixiv|i\.pximg)\.net\/(?:(?:\w+\/)?artworks\/|member_illust\.php\?.*?illust_id=|.*?\/img\/\d{4}(?:\/\d\d){5}\/)(\d+)/;
 
 /**
  * Check whether or not a particular comment was made by this bot.
