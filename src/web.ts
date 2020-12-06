@@ -12,6 +12,8 @@ app.get("/", (req, res) => {
   );
 });
 
+app.get("/api/v1/ping", (req, res) => res.send("pong"));
+
 app.listen(port, () => {
   logger.info(`Webserver started on port ${port}`);
 });
