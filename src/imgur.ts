@@ -45,11 +45,10 @@ export async function createAlbum(
 
   const res = await got
     .post("https://api.imgur.com/3/album", { body: form, headers })
-    .json();
+    .json<{ data: ImgurAlbum }>();
 
-  // @ts-expect-error: Pending sindresorhus/got#1548
-  const album: ImgurAlbum = res.data;
-  log.info("Successfully created album", album);
+  const album = res.data;
+  log.info("Successfully created album", { album });
   return album;
 }
 
@@ -87,11 +86,11 @@ export async function uploadImage(
   }
   const res = await got
     .post("https://api.imgur.com/3/upload", { body: form, headers })
-    .json();
+    .json<{ data: ImgurImage }>();
 
-  log.info("Successfully uploaded image");
-  // @ts-expect-error: Pending sindresorhus/got#1548
-  return res.data;
+  const image = res.data;
+  log.info("Successfully uploaded image", { image });
+  return image;
 }
 
 export default {
