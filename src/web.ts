@@ -1,10 +1,10 @@
 import { sublog } from "./logger.js";
 import express from "express";
+import { port } from "./util.js";
 
 const logger = sublog("webserver");
 
 const app = express();
-const port = process.env.PORT || 8080;
 
 app.get("/", (req, res) => {
   res.send(

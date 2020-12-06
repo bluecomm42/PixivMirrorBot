@@ -8,6 +8,9 @@ class Replyable {
 // Test link: regexr.com/5hoq5
 export const regexBase = /https?:\/\/(?:(?:www\.)?pixiv|i\.pximg)\.net\/(?:(?:\w+\/)?artworks\/|member_illust\.php\?.*?illust_id=|.*?\/img\/\d{4}(?:\/\d\d){5}\/)(\d+)/;
 
+/** The port to run the webserver on */
+export const port = process.env.PORT || 8080;
+
 /**
  * Check whether or not a particular comment was made by this bot.
  *
