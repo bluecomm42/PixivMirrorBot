@@ -1,5 +1,5 @@
-import { sublog } from "./logger.js";
 import express from "express";
+import { sublog } from "./logger.js";
 import { port } from "./util.js";
 
 const logger = sublog("webserver");
