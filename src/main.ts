@@ -2,6 +2,7 @@
 import { version } from "./config.js";
 
 import "./web.js";
+import "./keepalive.js";
 import log, { clsWrap } from "./logger.js";
 import Snoowrap from "snoowrap";
 import processComment from "./process/comment.js";
