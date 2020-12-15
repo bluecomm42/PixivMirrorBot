@@ -25,6 +25,15 @@ export async function init(): Promise<void> {
 }
 
 /**
+ * Close the database connection(s).
+ */
+export async function stop(): Promise<void> {
+  logger.info("Closing database connection(s)");
+  await pool.end();
+  logger.info("Database successfully disconnected");
+}
+
+/**
  * Get a cached album, if it exists.
  *
  * @param id The id of the Pixiv post.

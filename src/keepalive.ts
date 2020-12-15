@@ -12,16 +12,17 @@ const url = new URL(
 ).toString();
 log.debug(`keepalive url: ${url}`);
 
+let to: NodeJS.Timeout;
 async function ping() {
   try {
     log.info("Sending keepalive request");
     const res = await got.get(url);
     log.info("Keepalive request successful", { res: res.body });
-    setTimeout(keepalive, interval);
+    to = setTimeout(keepalive, interval);
   } catch (e) {
     // Something went wrong, log and try again in 10s.
     log.error("Keepalive request errored", e);
-    setTimeout(keepalive, 10 * 1000);
+    to = setTimeout(keepalive, 10 * 1000);
   }
 }
 
@@ -29,4 +30,18 @@ function keepalive() {
   clsWrap(ping);
 }
 
-setTimeout(keepalive, interval);
+/**
+ * Start the keepalive routine.
+ */
+export function start(): void {
+  if (!to) {
+    to = setTimeout(keepalive, interval);
+  }
+}
+
+/**
+ * Stop the keepalive routine.
+ */
+export function stop(): void {
+  clearTimeout(to);
+}
