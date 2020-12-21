@@ -1,4 +1,5 @@
-import { Comment, Listing, VoteableContent } from "snoowrap";
+import Snoowrap, { Comment, Listing, VoteableContent } from "snoowrap";
+import { Timestamps, CombinedTimestamps } from "./database.js";
 
 class Replyable {
   comments?: Listing<Comment>;
@@ -36,6 +37,10 @@ export async function alreadyReplied<T>(
   return r.some(myComment);
 }
 
+export function addFooter(msg: string): string {
+  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=Bot%20Error\n[github]: https://github.com/`;
+}
+
 /**
  * Build a comment for a given message.
  *
@@ -54,32 +59,53 @@ export function buildComment(albums: string[]): string {
     }
   }
 
-  // TODO: Add bot info footer.
-  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=Bot%20Error\n[github]: https://github.com/`;
+  return addFooter(msg);
+}
+
+/**
+ * Build a comment for a given message.
+ *
+ * @param album The link to the mirror album.
+ *
+ * @returns The final comment.
+ */
+export function buildRemovalComment(album: string): string {
+  let msg = `Directly linking to 18+ Pixiv posts is not allowed because they require a Pixiv account to view. Please make a new post from [this mirror](${album}) instead.`;
+  return addFooter(msg);
 }
 
 /**
  * Dedupe a given array.
  *
  * @param arr The array to dedupe.
- * @param hasher The function to use to hash each entry to tell them apart. Defaults to JSON.stringify.
  */
-export function dedupe<T>(
-  arr: Array<T>,
-  hasher: (itm: any) => any = JSON.stringify
-): Array<T> {
-  const clone = [];
-  const lookup: { [key: string]: boolean } = {};
+export function dedupe<T>(arr: Array<T>): Array<T> {
+  return [...new Set(arr)];
+}
 
-  for (let i = 0; i < arr.length; i++) {
-    let elem = arr[i];
-    let hashed = hasher(elem);
-
-    if (!lookup[hashed]) {
-      clone.push(elem);
-      lookup[hashed] = true;
-    }
+export function extractTimestamps(
+  ts: CombinedTimestamps,
+  key: "post" | "comment"
+): Timestamps {
+  const out: Timestamps = {};
+  for (const sub in ts) {
+    out[sub] = ts[sub][key];
   }
+  return out;
+}
 
-  return clone;
+export function mergeTimestamps(
+  posts: Timestamps,
+  comments: Timestamps
+): CombinedTimestamps {
+  const out: CombinedTimestamps = {};
+  // Dedupe object keys
+  const keys = dedupe([...Object.keys(posts), ...Object.keys(comments)]);
+  for (const key of keys) {
+    out[key] = {
+      post: posts[key] || 0,
+      comment: comments[key] || 0,
+    };
+  }
+  return out;
 }

@@ -1,13 +1,15 @@
-import logger from "../logger.js";
+import logger from "../../common/logger.js";
 import mirror from "../pixiv-mirror.js";
+import client from "../../common/client.js";
 import Bluebird from "bluebird";
+
 import {
   alreadyReplied,
   buildComment,
   dedupe,
   myComment,
   regexBase,
-} from "../util.js";
+} from "../../common/util.js";
 import { Comment } from "snoowrap";
 
 const commentRegex = new RegExp(regexBase, "g");
@@ -17,11 +19,14 @@ const commentRegex = new RegExp(regexBase, "g");
  *
  * @param comment The comment to process.
  */
-export default async function processComment(comment: Comment): Promise<void> {
+export default async function processComment(commentId: string): Promise<void> {
+  // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
+  const comment: Comment = await client.getComment(commentId).fetch();
+
   // Ignore any comments made by this bot to avoid accidental loops.
   if (myComment(comment)) return;
 
-  const log = logger.child({ comment: comment.id });
+  const log = logger.child({ comment: commentId });
   log.info("Processing comment");
 
   if (comment.archived) {

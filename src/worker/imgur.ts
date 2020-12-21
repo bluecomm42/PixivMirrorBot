@@ -1,4 +1,4 @@
-import { sublog } from "./logger.js";
+import { sublog } from "../common/logger.js";
 import got from "got";
 import FormData from "form-data";
 

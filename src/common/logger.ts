@@ -14,11 +14,12 @@ const transports = winston.transports as Transports;
 const clsNamespace = cls.createNamespace("clsLoggerNamespace");
 
 function getTransports(): TransportStream[] {
-  const tps: TransportStream[] = [
-    new transports.Console({
-      format: winston.format.combine(addTrace(), winston.format.simple()),
-    }),
-  ];
+  const format = winston.format.combine(
+    winston.format.errors({ stack: true }),
+    addTrace(),
+    winston.format.simple()
+  );
+  const tps: TransportStream[] = [new transports.Console({ format })];
 
   const host = process.env.SYSLOG_HOST;
   const port = parseInt(process.env.SYSLOG_PORT);
@@ -30,7 +31,7 @@ function getTransports(): TransportStream[] {
         protocol: "tls4",
         localhost: `u/${process.env.REDDIT_USER}`,
         eol: "\n",
-        format: winston.format.combine(addTrace(), winston.format.json()),
+        format,
       })
     );
   }
@@ -43,6 +44,12 @@ const addTrace = winston.format((info, opts) => {
   const _trace = clsNamespace.get("_trace");
   if (_trace != null) {
     info = { ...info, _trace };
+  }
+
+  // Add trace data, if present.
+  const _traceData = clsNamespace.get("_traceData");
+  if (_traceData != null) {
+    info = { ...info, _traceData };
   }
   return info;
 });
@@ -70,9 +77,12 @@ export function clsBind(...emitters: EventEmitter[]): void {
  *
  * @param fn The function to run.
  */
-export async function clsWrap<T>(fn: () => Promise<T>): Promise<T> {
+export async function clsWrap<T>(fn: () => Promise<T>, data?: any): Promise<T> {
   return clsNamespace.runPromise(() => {
     clsNamespace.set("_trace", uuid());
+    if (data) {
+      clsNamespace.set("_traceData", data);
+    }
     return fn();
   });
 }

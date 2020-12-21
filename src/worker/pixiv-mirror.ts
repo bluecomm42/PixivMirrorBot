@@ -1,7 +1,7 @@
-import { sublog } from "./logger.js";
+import { sublog } from "../common/logger.js";
 import pixiv from "./pixiv.js";
 import imgur from "./imgur.js";
-import { getAlbum, cacheAlbum } from "./database.js";
+import { getAlbum, cacheAlbum } from "../common/database.js";
 
 const logger = sublog("mirror");
 
