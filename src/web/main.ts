@@ -16,6 +16,7 @@ import * as web from "./web.js";
   async function shutdown(signal: NodeJS.Signals) {
     log.info(`Received ${signal}, shutting down...`);
     await web.stop();
+    log.close();
     process.exit(0);
   }
 

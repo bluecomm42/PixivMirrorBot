@@ -73,7 +73,9 @@ const worker = new Worker(queueName, wrapJob, queueConfig);
  */
 function shutdown(signal: NodeJS.Signals) {
   log.info(`Received ${signal}, shutting down...`);
-  Bluebird.all([worker.close(), scheduler.close()]).then(() => process.exit(0));
+  Bluebird.all([worker.close(), scheduler.close()])
+    .then(() => log.close())
+    .then(() => process.exit(0));
 }
 
 // Perform a clean shutdown on SIGINT/SIGTERM
