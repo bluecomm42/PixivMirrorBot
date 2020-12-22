@@ -6,6 +6,8 @@ import { port } from "../common/util.js";
 import { Server } from "http";
 import Arena from "bull-arena";
 import Bluebird from "bluebird";
+import morgan from "morgan";
+import split from "split";
 import { Queue } from "bullmq";
 import { connection } from "../common/queue.js";
 
@@ -31,6 +33,9 @@ const arena = Arena(
 );
 
 const app = express();
+
+const stream = split().on("data", (msg) => logger.info(msg));
+app.use(morgan("combined", { stream }));
 
 app.get("/", (req, res) => {
   const user = process.env.REDDIT_USER;
