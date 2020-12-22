@@ -4,13 +4,13 @@ import processSubreddits from "./process/subreddit.js";
 import processInbox from "./process/inbox.js";
 import processComment from "./process/comment.js";
 import processPost from "./process/post.js";
-import queue, { config as queueConfig } from "../common/queue.js";
+import queue, { connection } from "../common/queue.js";
 import { Job, QueueScheduler, Worker } from "bullmq";
 import Bluebird from "bluebird";
 
 log.info(`Starting PixivMirrorBot worker v${version}`);
 
-const scheduler = new QueueScheduler(queueName, queueConfig);
+const scheduler = new QueueScheduler(queueName, { connection });
 // Process subreddits every 5 minutes.
 const fiveMins = 5 * 60 * 1000;
 queue.add("process-subreddits", null, { repeat: { every: fiveMins } });
@@ -64,7 +64,7 @@ async function wrapJob(job: Job) {
 }
 
 // Start the worker.
-const worker = new Worker(queueName, wrapJob, queueConfig);
+const worker = new Worker(queueName, wrapJob, { connection });
 
 /**
  * Perform a clean shutdown of the system.
