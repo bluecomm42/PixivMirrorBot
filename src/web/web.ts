@@ -10,6 +10,7 @@ import { Queue } from "bullmq";
 
 const logger = sublog("webserver");
 
+console.log("redis url:", process.env.REDIS_URL);
 const arena = Arena(
   {
     BullMQ: Queue,
