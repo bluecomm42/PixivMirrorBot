@@ -5,4 +5,5 @@ import log from "./common/logger.js";
   await db.init();
   await db.stop();
   log.close();
+  process.exit(0);
 })();
