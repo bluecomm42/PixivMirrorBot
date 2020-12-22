@@ -7,6 +7,7 @@ import { Server } from "http";
 import Arena from "bull-arena";
 import Bluebird from "bluebird";
 import { Queue } from "bullmq";
+import { connection } from "../common/queue.js";
 
 const logger = sublog("webserver");
 
@@ -18,7 +19,8 @@ const arena = Arena(
         type: "bullmq",
         name: queueName,
         hostId: process.env.REDDIT_USER,
-        url: process.env.REDIS_URL,
+        // @ts-expect-error: Pending ISSUE TBD
+        redis: connection,
       },
     ],
   },
