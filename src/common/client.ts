@@ -11,6 +11,7 @@ const client = new Snoowrap({
 client.config({
   continueAfterRatelimitError: true,
   debug: process.env.NODE_ENV !== "production",
+  proxies: false,
 });
 
 export default client;
