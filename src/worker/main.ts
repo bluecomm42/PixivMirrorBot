@@ -64,7 +64,7 @@ async function wrapJob(job: Job) {
 }
 
 // Start the worker.
-const worker = new Worker(queueName, wrapJob, { connection });
+const worker = new Worker(queueName, wrapJob, { concurrency: 2, connection });
 
 /**
  * Perform a clean shutdown of the system.
