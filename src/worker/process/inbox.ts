@@ -1,7 +1,8 @@
 import { sublog } from "../../common/logger.js";
 import client from "../../common/client.js";
 import queue from "../../common/queue.js";
-import { PrivateMessage } from "snoowrap";
+import { Listing, PrivateMessage } from "snoowrap";
+import { maxPageSize } from "../../common/config.js";
 
 const logger = sublog("processor.inbox");
 
@@ -54,17 +55,28 @@ async function processComment(msg: PrivateMessage): Promise<void> {
 
 export default async function processInbox(): Promise<void> {
   logger.info("Checking inbox");
-  const messages = await client.getUnreadMessages();
-  logger.info(`Found ${messages.length} unread message(s)`);
-  if (messages.length === 0) return;
-
-  client.markMessagesAsRead(messages);
-
-  for (let msg of messages) {
-    if (msg.was_comment) {
-      await processComment(msg);
+  let messages: Listing<PrivateMessage>;
+  do {
+    if (messages == null) {
+      messages = await client.getUnreadMessages({ limit: maxPageSize });
     } else {
-      await processPrivateMessage(msg);
+      messages = await messages.fetchMore({
+        amount: maxPageSize,
+        append: false,
+      });
     }
-  }
+
+    if (messages.length > 0) {
+      client.markMessagesAsRead(messages);
+    }
+
+    for (const msg of messages) {
+      if (msg.was_comment) {
+        await processComment(msg);
+      } else {
+        await processPrivateMessage(msg);
+      }
+    }
+  } while (!messages.isFinished);
+  logger.info("Finished processing inbox");
 }
