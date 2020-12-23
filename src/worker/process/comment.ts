@@ -8,6 +8,7 @@ import {
   buildComment,
   dedupe,
   myComment,
+  mentionsMe,
   regexBase,
 } from "../../common/util.js";
 import { Comment } from "snoowrap";
@@ -64,6 +65,11 @@ export default async function processComment(commentId: string): Promise<void> {
   }
   if (await alreadyReplied(comment)) {
     log.info("Already replied to comment");
+    return;
+  }
+  if (mentionsMe(comment)) {
+    // Mentions are processed specially, don't put it through the normal flow.
+    log.info("Comment is a mention");
     return;
   }
 

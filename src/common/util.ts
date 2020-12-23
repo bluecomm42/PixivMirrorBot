@@ -1,6 +1,7 @@
-import Snoowrap, { Comment, Listing, VoteableContent } from "snoowrap";
+import { Comment, Listing, VoteableContent } from "snoowrap";
 import { Timestamps, CombinedTimestamps } from "./database.js";
 import { getTraceUUID } from "./logger.js";
+import { Statuses } from "./types.js";
 
 class Replyable {
   comments?: Listing<Comment>;
@@ -23,6 +24,19 @@ export const port = process.env.PORT || 8080;
 export function myComment(c: Comment): boolean {
   return c.author.name.toLowerCase() === process.env.REDDIT_USER.toLowerCase();
 }
+
+/**
+ * Check whether a comment contains a mention of this bot (u/<bot name>)
+ *
+ * @param c The comment to check.
+ *
+ * @returns Whether or not the comment mentions this bot.
+ */
+export function mentionsMe(c: Comment): boolean {
+  const mention = `u/${process.env.REDDIT_USER}`.toLowerCase();
+  return c.body.toLowerCase().includes(mention);
+}
+
 /**
  * Check if the bot has already replied to a given post/comment.
  *
@@ -87,6 +101,34 @@ export function buildComment(albums: string[]): string {
  */
 export function buildRemovalComment(album: string): string {
   let msg = `Directly linking to 18+ Pixiv posts is not allowed because they require a Pixiv account to view. Please make a new post from [this mirror](${album}) instead.`;
+  return addFooter(msg);
+}
+
+export function buildMentionReply(
+  status: Statuses,
+  albums: string[]
+): string | null {
+  let msg = "";
+  switch (status) {
+    case "ok":
+      if (albums.length === 1) {
+        msg = `I found a link to an 18+ Pixiv post. Those require a Pixiv account to view, so [here](${albums[0]}) is a mirror.`;
+      } else {
+        msg = `I found a link to some 18+ Pixiv posts. Those require a Pixiv account to view, so here are some mirrors:`;
+        for (const album of albums) {
+          msg += `\n1. [mirror](${album})`;
+        }
+      }
+      break;
+    case "no mirror":
+      msg =
+        "I found one or more pixiv links, but I was unable to mirror them. Most likely they are not behind an account wall.";
+      break;
+    case "no match":
+    default:
+      return null;
+  }
+
   return addFooter(msg);
 }
 

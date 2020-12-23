@@ -7,6 +7,7 @@ import processPost from "./process/post.js";
 import queue, { connection } from "../common/queue.js";
 import { Job, QueueScheduler, Worker } from "bullmq";
 import Bluebird from "bluebird";
+import processMention from "./process/mention.js";
 
 logger.info(`Starting PixivMirrorBot worker v${version}`);
 
@@ -35,13 +36,12 @@ async function _processJob(job: Job) {
     case "process-comment":
       await processComment(job.data.id);
       break;
+    case "process-mention":
+      await processMention(job.data.id);
+      break;
     // TODO?:
     // case "mirrorPost":
     //   await mirrorPost(job.data);
-    //   break;
-    // TODO:
-    // case "processMention":
-    //   await processPost(job.data.id);
     //   break;
     default:
       logger.warn("Unknown job type", { jobType: job.name });
