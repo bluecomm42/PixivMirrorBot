@@ -30,7 +30,7 @@ function getTransports(): TransportStream[] {
         host,
         port,
         protocol: "tls4",
-        localhost: `u/${process.env.REDDIT_USER}`,
+        localhost: process.env.DYNO || `u/${process.env.REDDIT_USER}`,
         eol: "\n",
         format,
       })
