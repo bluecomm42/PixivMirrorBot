@@ -40,15 +40,22 @@ function getTransports(): TransportStream[] {
   return tps;
 }
 
+export function getTraceUUID(): string | null {
+  return clsNamespace.get("_trace");
+}
+export function getTraceData(): any {
+  return clsNamespace.get("_traceData");
+}
+
 const addTrace = winston.format((info, opts) => {
   // Add trace UUID, if present.
-  const _trace = clsNamespace.get("_trace");
+  const _trace = getTraceUUID();
   if (_trace != null) {
     info = { ...info, _trace };
   }
 
   // Add trace data, if present.
-  const _traceData = clsNamespace.get("_traceData");
+  const _traceData = getTraceData();
   if (_traceData != null) {
     info = { ...info, _traceData };
   }

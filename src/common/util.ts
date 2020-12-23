@@ -1,5 +1,6 @@
 import Snoowrap, { Comment, Listing, VoteableContent } from "snoowrap";
 import { Timestamps, CombinedTimestamps } from "./database.js";
+import { getTraceUUID } from "./logger.js";
 
 class Replyable {
   comments?: Listing<Comment>;
@@ -37,8 +38,23 @@ export async function alreadyReplied<T>(
   return r.some(myComment);
 }
 
+function getFooterLinks(): string {
+  let subject = "Bot Error";
+  let trace = getTraceUUID();
+  if (trace) {
+    subject += ` (trace: ${trace})`;
+  }
+  subject = encodeURIComponent(subject);
+
+  const links = [
+    `[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=${subject}`,
+    "[github]: https://github.com/",
+  ];
+  return links.join("\n");
+}
+
 export function addFooter(msg: string): string {
-  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=Bot%20Error\n[github]: https://github.com/`;
+  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n${getFooterLinks()}`;
 }
 
 /**
