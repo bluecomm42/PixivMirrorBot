@@ -108,7 +108,7 @@ export async function processSubredditContent<T extends Submission | Comment>(
       // Keep track of the newest post we've seen from each sub.
       newestItems[sub] = Math.max(newestItems[sub] || 0, timestamp);
       queue.add(`process-${contentType}`, { id: item.id });
-      itmLog.info("Item added to queue");
+      itmLog.info(`Queued ${contentType} for processing`);
     }
   } while (!items.isFinished && shouldContinue);
 

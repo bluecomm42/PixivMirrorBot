@@ -42,8 +42,8 @@ async function processComment(msg: PrivateMessage): Promise<void> {
   log.info("Processing comment");
 
   if (msg.subject === "username mention") {
-    log.info("Mentioned!");
     queue.add("process-mention", { id: msg.id });
+    log.info("Queued mention for processing");
   } else {
     log.info("Ignored comment", {
       subject: msg.subject,
