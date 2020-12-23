@@ -1,3 +1,4 @@
+import { inProduction } from "./config.js";
 import winston, { Logger } from "winston";
 import * as cls from "cls-hooked";
 import { v4 as uuid } from "uuid";
@@ -23,7 +24,7 @@ function getTransports(): TransportStream[] {
 
   const host = process.env.SYSLOG_HOST;
   const port = parseInt(process.env.SYSLOG_PORT);
-  if (process.env.NODE_ENV === "production" && !!host && !!port) {
+  if (inProduction && !!host && !!port) {
     tps.push(
       new transports.Syslog({
         host,

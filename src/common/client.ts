@@ -1,4 +1,4 @@
-import { version } from "./config.js";
+import { inProduction, version } from "./config.js";
 import Snoowrap from "snoowrap";
 
 const client = new Snoowrap({
@@ -10,7 +10,7 @@ const client = new Snoowrap({
 });
 client.config({
   continueAfterRatelimitError: true,
-  debug: process.env.NODE_ENV !== "production",
+  debug: !inProduction,
   proxies: false,
 });
 
