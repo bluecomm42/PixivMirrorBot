@@ -1,5 +1,5 @@
 import { queueName, version } from "../common/config.js";
-import log, { clsWrap } from "../common/logger.js";
+import logger, { clsWrap } from "../common/logger.js";
 import processSubreddits from "./process/subreddit.js";
 import processInbox from "./process/inbox.js";
 import processComment from "./process/comment.js";
@@ -8,7 +8,7 @@ import queue, { connection } from "../common/queue.js";
 import { Job, QueueScheduler, Worker } from "bullmq";
 import Bluebird from "bluebird";
 
-log.info(`Starting PixivMirrorBot worker v${version}`);
+logger.info(`Starting PixivMirrorBot worker v${version}`);
 
 const scheduler = new QueueScheduler(queueName, { connection });
 // Process subreddits every 5 minutes.
@@ -22,7 +22,6 @@ queue.add("process-inbox", null, { repeat: { every: fiveMins } });
  * @param job The job to process.
  */
 async function _processJob(job: Job) {
-  log.info("Processing job", { job: { name: job.name, id: job.id } });
   switch (job.name) {
     case "process-subreddits":
       await processSubreddits();
@@ -45,16 +44,18 @@ async function _processJob(job: Job) {
     //   await processPost(job.data.id);
     //   break;
     default:
-      log.warn("Unknown job type", { jobType: job.name });
+      logger.warn("Unknown job type", { jobType: job.name });
   }
 }
 
 async function processJob(job: Job) {
+  const log = logger.child({ job: { name: job.name, id: job.id } });
   try {
+    log.info("Processing job");
     await _processJob(job);
+    log.info("Finished processing job");
   } catch (e) {
     log.error("Failed to process job", e);
-    console.log(e);
     throw e;
   }
 }
@@ -72,9 +73,9 @@ const worker = new Worker(queueName, wrapJob, { concurrency: 2, connection });
  * @param signal The signal that caused the shutdown.
  */
 function shutdown(signal: NodeJS.Signals) {
-  log.info(`Received ${signal}, shutting down...`);
+  logger.info(`Received ${signal}, shutting down...`);
   Bluebird.all([worker.close(), scheduler.close()])
-    .then(() => log.close())
+    .then(() => logger.close())
     .then(() => process.exit(0));
 }
 
