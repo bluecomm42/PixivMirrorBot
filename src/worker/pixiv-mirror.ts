@@ -22,11 +22,12 @@ function buildDescription(caption: string, attribution: string): string {
  * Mirror a Pixiv post to Imgur.
  *
  * @param id The ID of the post to mirror.
+ * @param retry Whether or not this is a retried attempt (internal use only).
  *
  * @returns The url of the newly created Imgur mirror.
  */
-export default async function mirror(id: number): Promise<string> {
-  const log = logger.child({ pixiv_id: id });
+async function _mirror(id: number, retry: boolean): Promise<string | null> {
+  const log = logger.child({ pixiv_id: id, retry });
   log.info("Mirroring post");
 
   // If the post was already mirrored, just use that one.
@@ -64,14 +65,29 @@ export default async function mirror(id: number): Promise<string> {
     await cacheAlbum(id, album.id, album.deletehash);
     return `https://imgur.com/a/${album.id}`;
   } catch (e) {
+    // Something went wrong, clean up and abort.
+    imgur.deleteAlbum(album.deletehash);
+
     if (e && e.constraint === "mirrors_pkey") {
       log.info(`Already mirrored the album ${id}. Whoops!`);
+      // There's already a mirror in the db, try again, hopefully hitting the
+      // cache this time.
+      if (!retry) return _mirror(id, true);
     } else {
       log.error("Unable to cache album", e);
     }
 
-    // Something went wrong, clean up and abort.
-    imgur.deleteAlbum(album.deletehash);
     return null;
   }
+}
+
+/**
+ * Mirror a Pixiv post to Imgur.
+ *
+ * @param id The ID of the post to mirror.
+ *
+ * @returns The url of the newly created Imgur mirror.
+ */
+export default async function mirror(id: number): Promise<string | null> {
+  return await _mirror(id, false);
 }
