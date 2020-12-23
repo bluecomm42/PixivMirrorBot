@@ -8,6 +8,7 @@ import {
   regexBase,
 } from "../../common/util.js";
 import { Submission, Subreddit } from "snoowrap";
+import { Mirror } from "../../common/types.js";
 
 const postRegex = new RegExp(`^${regexBase.source}`);
 
@@ -35,6 +36,31 @@ async function getActions(post: Submission): Promise<PostActions> {
 }
 
 /**
+ * Mirrors a post.
+ *
+ * @param post The post to mirror.
+ */
+export async function mirrorPost(post: Submission): Promise<Mirror> {
+  const log = logger.child({ post: post.id });
+  log.info("Mirroring post");
+
+  const m = post.url.match(postRegex);
+  if (m == null) {
+    log.info("Post url isn't Pixiv", { postUrl: post.url });
+    return { status: "no match", albums: [] };
+  }
+
+  const pixivId = parseInt(m[1]);
+  const album = await mirror(pixivId);
+  if (album == null) {
+    log.info("No mirror created");
+    return { status: "no mirror", albums: [] };
+  }
+
+  return { status: "ok", albums: [album] };
+}
+
+/**
  * Process a post.
  *
  * @param postId The id of the post to process.
@@ -50,22 +76,19 @@ export default async function processPost(postId: string): Promise<void> {
     log.info("Post is archived, ignoring");
     return;
   }
-  const m = post.url.match(postRegex);
-  if (m == null) {
-    log.info("Post url isn't Pixiv", { postUrl: post.url });
-    return;
-  }
+
   if (await alreadyReplied(post)) {
     log.info("Already replied to post");
     return;
   }
 
-  const pixivId = parseInt(m[1]);
-  const album = await mirror(pixivId);
-  if (album == null) {
-    log.info("No mirror created");
+  const { status, albums } = await mirrorPost(post);
+
+  if (status !== "ok" || albums.length !== 1) {
+    log.info("Unable to mirror post", { status });
     return;
   }
+  const album = albums[0];
 
   const { remove, distinguish, sticky } = await getActions(post);
   const msg = remove ? buildRemovalComment(album) : buildComment([album]);

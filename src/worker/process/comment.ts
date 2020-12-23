@@ -11,38 +11,24 @@ import {
   regexBase,
 } from "../../common/util.js";
 import { Comment } from "snoowrap";
+import { Mirror } from "../../common/types.js";
 
 const commentRegex = new RegExp(regexBase, "g");
 
 /**
- * Process a single comment.
+ * Mirrors a single comment.
  *
  * @param comment The comment to process.
  */
-export default async function processComment(commentId: string): Promise<void> {
-  // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
-  const comment: Comment = await client.getComment(commentId).fetch();
-
-  // Ignore any comments made by this bot to avoid accidental loops.
-  if (myComment(comment)) return;
-
-  const log = logger.child({ comment: commentId });
-  log.info("Processing comment");
-
-  if (comment.archived) {
-    log.info("Comment is archived, ignoring");
-    return;
-  }
+export async function mirrorComment(comment: Comment): Promise<Mirror> {
+  const log = logger.child({ comment: comment.id });
+  log.info("Mirroring comment");
 
   const matches = comment.body.matchAll(commentRegex);
   const foundIds = Array.from(matches, (m) => parseInt(m[1]));
   if (foundIds.length === 0) {
     log.info("Found no matches");
-    return;
-  }
-  if (await alreadyReplied(comment)) {
-    log.info("Already replied to comment");
-    return;
+    return { status: "no match", albums: [] };
   }
 
   const ids = dedupe(foundIds);
@@ -54,7 +40,36 @@ export default async function processComment(commentId: string): Promise<void> {
 
   if (albums.length === 0) {
     log.info("No mirror(s) created");
+    return { status: "no mirror", albums: [] };
+  }
+
+  return { status: "ok", albums };
+}
+
+export default async function processComment(commentId: string): Promise<void> {
+  const log = logger.child({ comment: commentId });
+  log.info("Processing comment");
+
+  // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
+  const comment: Comment = await client.getComment(commentId).fetch();
+
+  // Ignore any comments made by this bot to avoid accidental loops.
+  if (myComment(comment)) {
+    log.info("Comment was made by me, ignoring");
     return;
+  }
+  if (comment.archived) {
+    log.info("Comment is archived, ignoring");
+    return;
+  }
+  if (await alreadyReplied(comment)) {
+    log.info("Already replied to comment");
+    return;
+  }
+
+  const { status, albums } = await mirrorComment(comment);
+  if (status !== "ok") {
+    log.info("Unable to mirror", { status });
   }
 
   const msg = buildComment(albums);
