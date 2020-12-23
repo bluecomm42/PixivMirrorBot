@@ -1,4 +1,4 @@
-import { queueName } from "./config.js";
+import { inProduction, queueName } from "./config.js";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
@@ -9,6 +9,11 @@ const queue = new Queue(queueName, {
   defaultJobOptions: {
     removeOnComplete: 1000,
     removeOnFail: 1000,
+    attempts: inProduction ? 10 : 1,
+    backoff: {
+      type: "exponential",
+      delay: 60 * 1000,
+    },
   },
 });
 export default queue;
