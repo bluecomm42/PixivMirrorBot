@@ -20,7 +20,7 @@ export const port = process.env.PORT || 8080;
  * @returns Whether or not the comment was made by this bot.
  */
 export function myComment(c: Comment): boolean {
-  return c.author.name === process.env.REDDIT_USER;
+  return c.author.name.toLowerCase() === process.env.REDDIT_USER.toLowerCase();
 }
 /**
  * Check if the bot has already replied to a given post/comment.
