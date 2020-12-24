@@ -76,6 +76,7 @@ export default async function processComment(commentId: string): Promise<void> {
   const { status, albums } = await mirrorComment(comment);
   if (status !== "ok") {
     log.info("Unable to mirror", { status });
+    return;
   }
 
   const msg = buildComment(albums);
