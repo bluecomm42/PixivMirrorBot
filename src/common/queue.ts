@@ -7,8 +7,8 @@ export const connection = new IORedis(process.env.REDIS_URL);
 const queue = new Queue(queueName, {
   connection,
   defaultJobOptions: {
-    removeOnComplete: 1000,
-    removeOnFail: 1000,
+    removeOnComplete: 100,
+    removeOnFail: 500,
     attempts: inProduction ? 10 : 1,
     backoff: {
       type: "exponential",
