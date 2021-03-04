@@ -5,7 +5,9 @@ import { fileURLToPath } from "url";
 
 // Only try to load from .env in dev mode.
 export const inProduction = process.env.NODE_ENV === "production";
-if (inProduction) {
+export const inDebug = !inProduction;
+
+if (inDebug) {
   dotenv.config();
 }
 
