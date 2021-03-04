@@ -1,4 +1,4 @@
-import { queueName, version } from "../common/config.js";
+import { inProduction, queueName, version } from "../common/config.js";
 import logger, { clsWrap } from "../common/logger.js";
 import processSubreddits from "./process/subreddit.js";
 import processInbox from "./process/inbox.js";
@@ -13,9 +13,12 @@ logger.info(`Starting PixivMirrorBot worker v${version}`);
 
 const scheduler = new QueueScheduler(queueName, { connection });
 // Process subreddits every 5 minutes.
-const fiveMins = 5 * 60 * 1000;
-queue.add("process-subreddits", null, { repeat: { every: fiveMins } });
-queue.add("process-inbox", null, { repeat: { every: fiveMins } });
+const minute = 60 * 1000;
+const fiveMins = 5 * minute;
+
+const processInterval = inProduction ? fiveMins : minute;
+queue.add("process-subreddits", null, { repeat: { every: processInterval } });
+queue.add("process-inbox", null, { repeat: { every: processInterval } });
 
 /**
  * Process a job from the queue.
