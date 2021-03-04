@@ -1,15 +1,15 @@
+import { sublog } from "../common/logger.js";
 import PixivAppApi from "pixiv-app-api";
 import got from "got";
 import ent from "ent";
 import { PixivIllust } from "pixiv-app-api/dist/PixivTypes";
+import { getConfig, setConfig } from "../common/database.js";
+
+const logger = sublog("pixiv");
 
 let authed = false;
 const headers = { referer: "https://pixiv.net/" };
-const pixiv = new PixivAppApi(
-  process.env.PIXIV_EMAIL,
-  process.env.PIXIV_PASSWORD,
-  { camelcaseKeys: true }
-);
+const pixiv = new PixivAppApi(undefined, { camelcaseKeys: true });
 
 /** A simplified Pixiv post. */
 interface PixivPost {
@@ -32,7 +32,7 @@ interface PixivPost {
  */
 function extractUrls(illust: PixivIllust): string[] {
   if (illust.metaPages.length > 0) {
-    return illust.metaPages.map((p) => p.imageUrls.original);
+    return illust.metaPages.map(p => p.imageUrls.original);
   } else {
     return [illust.metaSinglePage.originalImageUrl];
   }
@@ -53,6 +53,19 @@ function formatCaption(caption: string): string {
   return ent.decode(caption.replace(/<br *\/?>/, "\n"));
 }
 
+async function auth(): Promise<void> {
+  const token = process.env.PIXIV_TOKEN || (await getConfig("pixiv-token"));
+  try {
+    const res = await pixiv.login(token);
+    await setConfig("pixiv-token", res.refreshToken);
+  } catch (e) {
+    logger.error("Unable to log in to pixiv", { refreshToken: token });
+    logger.error(e);
+    throw new PixivError("Unable to login to pixiv", e);
+  }
+  authed = true;
+}
+
 /**
  * Extract relevant information from a Pixiv post.
  *
@@ -62,8 +75,7 @@ function formatCaption(caption: string): string {
  */
 export async function illust(id: number): Promise<PixivPost> {
   if (!authed) {
-    await pixiv.login();
-    authed = true;
+    await auth();
   }
 
   const { illust } = await pixiv.illustDetail(id);
@@ -85,6 +97,21 @@ export async function illust(id: number): Promise<PixivPost> {
  */
 export async function downloadImage(url: string): Promise<Buffer> {
   return await got.get(url, { headers }).buffer();
+}
+
+/**
+ * An error within the pixiv subsystem.
+ */
+class PixivError extends Error {
+  parent: Error;
+
+  constructor(msg: string, parent: Error) {
+    super(msg);
+    this.parent = parent;
+
+    // restore prototype chain
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }
 
 export default {

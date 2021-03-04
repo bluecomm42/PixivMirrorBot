@@ -31,7 +31,7 @@
     "ioredis": "^4.23.0",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
-    "pixiv-app-api": "git+https://github.com/Sn0wCrack/pixiv-app-api.git#84c149b692cd0318b6f1df180b46907c6f7e9844",
+    "pixiv-app-api": "bluecomm42/pixiv-app-api",
     "snoostorm": "^1.5.2",
     "snoowrap": "^1.22.0",
     "split": "^1.0.1",
