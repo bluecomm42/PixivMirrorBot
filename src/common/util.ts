@@ -130,8 +130,8 @@ export function buildMentionReply(
   }
 }
 
-export function mdCodeBlock(lang: string, code: string): string {
-  return "```" + lang + "\n" + code + "\n```";
+export function mdCodeBlock(code: string): string {
+  return "```\n" + code + "\n```";
 }
 
 /**
