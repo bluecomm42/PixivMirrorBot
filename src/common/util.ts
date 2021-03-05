@@ -115,9 +115,9 @@ export function buildMentionReply(
   switch (status) {
     case "ok":
       if (albums.length === 1) {
-        msg = `I found a link to an 18+ Pixiv post. Those require a Pixiv account to view, so [here](${albums[0]}) is a mirror.`;
+        msg = `[Here](${albums[0]}) is the mirror you requested!`;
       } else {
-        msg = `I found a link to some 18+ Pixiv posts. Those require a Pixiv account to view, so here are some mirrors:`;
+        msg = `Here are the mirrors you requested!`;
         for (const album of albums) {
           msg += `\n1. [mirror](${album})`;
         }
