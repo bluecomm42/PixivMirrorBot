@@ -27,6 +27,11 @@ async function processPrivateMessage(msg: PrivateMessage): Promise<void> {
       subject: msg.subject,
       body: msg.body,
     });
+  } else if (msg.parent_id != null) {
+    log.warn("Received (and ignoring) reply to private message", {
+      subject: msg.subject,
+      body: msg.body,
+    });
   } else {
     msg.reply(
       "I'm a bot so I cannot reply to your message. If you need to report a bug please message my creator, u/bluecomm403."
