@@ -63,7 +63,7 @@ async function _processMention(mention: Comment, log: Logger): Promise<string> {
     return msg;
   } else {
     log.info("Unable to find any pixiv links to mirror");
-    return "Thanks for calling your local Pixiv bot. Unfortunately I was unable to find any pixiv links to mirror.";
+    return "Thanks for calling your local Pixiv bot. Unfortunately I was unable to find any pixiv links in this thread.";
   }
 }
 
