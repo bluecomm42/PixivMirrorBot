@@ -4,8 +4,13 @@ import client from "../../common/client.js";
 import { Comment, Submission } from "snoowrap";
 import { mirrorComment } from "./comment.js";
 import { mirrorPost } from "./post.js";
-import { alreadyReplied, buildMentionReply } from "../../common/util.js";
+import {
+  addFooter,
+  alreadyReplied,
+  buildMentionReply,
+} from "../../common/util.js";
 import { isComment, isSubmission } from "../../common/types.js";
+import { Logger } from "winston";
 
 // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
 async function getParent(comment: Comment): Promise<Comment | Submission> {
@@ -29,17 +34,7 @@ async function getParent(comment: Comment): Promise<Comment | Submission> {
   }
 }
 
-export default async function processMention(commentId: string): Promise<void> {
-  const log = logger.child({ mention: commentId });
-  log.info("Processing mention");
-
-  // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
-  const mention: Comment = await client.getComment(commentId).fetch();
-  if (await alreadyReplied(mention)) {
-    log.info("Already replied, ignoring.");
-    return;
-  }
-
+async function _processMention(mention: Comment, log: Logger): Promise<string> {
   let item: Comment | Submission = mention;
   while (isComment(item)) {
     log.info("Checking comment for links", { comment: item.id });
@@ -47,8 +42,7 @@ export default async function processMention(commentId: string): Promise<void> {
     const msg = buildMentionReply(status, albums);
     if (msg != null) {
       log.info("Mirrored comment", { comment: item.id, status, albums });
-      mention.reply(msg);
-      return;
+      return msg;
     }
 
     // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
@@ -66,9 +60,24 @@ export default async function processMention(commentId: string): Promise<void> {
   const msg = buildMentionReply(status, albums);
   if (msg != null) {
     log.info("Mirrored post", { post: item.id, status, albums });
-    mention.reply(msg);
+    return msg;
+  } else {
+    log.info("Unable to find any pixiv links to mirror");
+    return "Thanks for calling your local Pixiv bot. Unfortunately I was unable to find any pixiv links to mirror.";
+  }
+}
+
+export default async function processMention(commentId: string): Promise<void> {
+  const log = logger.child({ mention: commentId });
+  log.info("Processing mention");
+
+  // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
+  const mention: Comment = await client.getComment(commentId).fetch();
+  if (await alreadyReplied(mention)) {
+    log.info("Already replied, ignoring.");
     return;
   }
 
-  log.info("Did not reply to mention");
+  const msg = await _processMention(mention, log);
+  mention.reply(addFooter(msg));
 }

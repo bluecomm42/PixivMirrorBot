@@ -111,28 +111,23 @@ export function buildMentionReply(
   status: Statuses,
   albums: string[]
 ): string | null {
-  let msg = "";
   switch (status) {
     case "ok":
       if (albums.length === 1) {
-        msg = `[Here](${albums[0]}) is the mirror you requested!`;
+        return `[Here](${albums[0]}) is the mirror you requested!`;
       } else {
-        msg = `Here are the mirrors you requested!`;
+        let msg = `Here are the mirrors you requested!`;
         for (const album of albums) {
           msg += `\n1. [mirror](${album})`;
         }
+        return msg;
       }
-      break;
     case "no mirror":
-      msg =
-        "I found one or more pixiv links, but I was unable to mirror them. Most likely they are not behind an account wall.";
-      break;
+      return "I found one or more pixiv links, but I was unable to mirror them. Most likely they are not behind an account wall.";
     case "no match":
     default:
       return null;
   }
-
-  return addFooter(msg);
 }
 
 /**
