@@ -130,6 +130,10 @@ export function buildMentionReply(
   }
 }
 
+export function mdCodeBlock(lang: string, code: string): string {
+  return "```" + lang + "\n" + code + "\n```";
+}
+
 /**
  * Dedupe a given array.
  *

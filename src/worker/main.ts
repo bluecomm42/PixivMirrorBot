@@ -5,6 +5,7 @@ import processInbox from "./process/inbox.js";
 import processComment from "./process/comment.js";
 import processPost from "./process/post.js";
 import queue, { connection } from "../common/queue.js";
+import { sendJobErrorDM } from "../common/dmOwner.js";
 import { Job, QueueScheduler, Worker } from "bullmq";
 import Bluebird from "bluebird";
 import processMention from "./process/mention.js";
@@ -59,6 +60,7 @@ async function processJob(job: Job) {
     log.info("Finished processing job");
   } catch (e) {
     log.error("Failed to process job", e);
+    await sendJobErrorDM(job, e);
     throw e;
   }
 }
