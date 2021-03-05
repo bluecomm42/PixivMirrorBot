@@ -12,7 +12,7 @@ export default async function sendDM(msg: string): Promise<void> {
 
 export async function sendJobErrorDM(job: Job, err: Error): Promise<void> {
   const jobBlock = mdCodeBlock(JSON.stringify(job.asJSON(), null, 2));
-  const errBlock = mdCodeBlock(`${err.message}\n${err.stack ?? ""}`);
+  const errBlock = mdCodeBlock(err.stack ?? err.message);
   return sendDM(
     `Something went wrong while I was processing the job:\n${jobBlock}\n\n${errBlock}`
   );
