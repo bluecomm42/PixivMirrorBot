@@ -52,14 +52,17 @@ export async function alreadyReplied<T>(
   return r.some(myComment);
 }
 
-function getFooterLinks(): string {
+export function buildDmSubject(): string {
   let subject = "Bot Error";
   let trace = getTraceUUID();
   if (trace) {
     subject += ` (trace: ${trace})`;
   }
-  subject = encodeURIComponent(subject);
+  return subject;
+}
 
+function getFooterLinks(): string {
+  const subject = encodeURIComponent(buildDmSubject());
   const links = [
     `[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=${subject}`,
     "[github]: https://github.com/",
