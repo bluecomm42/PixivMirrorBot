@@ -51,13 +51,16 @@ export async function mirrorPost(post: Submission): Promise<Mirror> {
   }
 
   const pixivId = parseInt(m[1]);
-  const album = await mirror(pixivId);
-  if (album == null) {
-    log.info("No mirror created");
-    return { status: "no mirror", albums: [] };
-  }
+  const { status, album } = await mirror(pixivId);
 
-  return { status: "ok", albums: [album] };
+  switch (status) {
+    case "ok":
+      return { status: "ok", albums: [album] };
+    case "sfw":
+      return { status: "only sfw", albums: [] };
+    case "failed":
+      return { status: "error", albums: [] };
+  }
 }
 
 /**

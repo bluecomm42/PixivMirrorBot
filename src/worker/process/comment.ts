@@ -26,7 +26,7 @@ export async function mirrorComment(comment: Comment): Promise<Mirror> {
   log.info("Mirroring comment");
 
   const matches = comment.body.matchAll(commentRegex);
-  const foundIds = Array.from(matches, (m) => parseInt(m[1]));
+  const foundIds = Array.from(matches, m => parseInt(m[1]));
   if (foundIds.length === 0) {
     log.info("Found no matches");
     return { status: "no match", albums: [] };
@@ -35,16 +35,27 @@ export async function mirrorComment(comment: Comment): Promise<Mirror> {
   const ids = dedupe(foundIds);
   log.info("Processing matches", { matches: ids });
 
-  const albums = await Bluebird.resolve(ids)
-    .map(mirror)
-    .filter((e) => e != null);
+  const mirrors = await Bluebird.resolve(ids).map(mirror);
 
-  if (albums.length === 0) {
-    log.info("No mirror(s) created");
-    return { status: "no mirror", albums: [] };
+  const albums: string[] = [];
+  for (const mirror of mirrors) {
+    switch (mirror.status) {
+      case "failed":
+        // If any of the mirrors failed, we too have failed.
+        // TODO: Clean up the other albums?
+        return { status: "error", albums: [] };
+      case "ok":
+        albums.push(mirror.album);
+        break;
+      case "sfw":
+      default:
+        continue;
+    }
   }
 
-  return { status: "ok", albums };
+  // If all of the posts we tried to mirror were sfw, reflect that.
+  const status = mirrors.length === 0 ? "only sfw" : "ok";
+  return { status, albums };
 }
 
 export default async function processComment(commentId: string): Promise<void> {

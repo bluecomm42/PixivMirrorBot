@@ -122,8 +122,10 @@ export function buildMentionReply(
         }
         return msg;
       }
-    case "no mirror":
-      return "I found one or more pixiv links, but I was unable to mirror them. Most likely they are not behind an account wall.";
+    case "only sfw":
+      return "I found one or more pixiv links, but they were all SFW posts and thus not behind an account wall.";
+    case "error":
+      return "I found one or more pixiv links, but I was unable to mirror them due to an error.";
     case "no match":
     default:
       return null;

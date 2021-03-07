@@ -5,6 +5,12 @@ import { getAlbum, cacheAlbum } from "../common/database.js";
 
 const logger = sublog("mirror");
 
+export type PixivStatuses = "ok" | "sfw" | "failed";
+export interface PixivMirror {
+  status: PixivStatuses;
+  album?: string;
+}
+
 /**
  * Build a description for an Imgur mirror
  *
@@ -24,9 +30,9 @@ function buildDescription(caption: string, attribution: string): string {
  * @param id The ID of the post to mirror.
  * @param retry Whether or not this is a retried attempt (internal use only).
  *
- * @returns The url of the newly created Imgur mirror.
+ * @returns The newly created Imgur mirror.
  */
-async function _mirror(id: number, retry: boolean): Promise<string | null> {
+async function _mirror(id: number, retry: boolean): Promise<PixivMirror> {
   const log = logger.child({ pixiv_id: id, retry });
   log.info("Mirroring post");
 
@@ -34,7 +40,7 @@ async function _mirror(id: number, retry: boolean): Promise<string | null> {
   const cached = await getAlbum(id);
   if (!!cached) {
     log.info("Cached mirror found");
-    return `https://imgur.com/a/${cached}`;
+    return { status: "ok", album: `https://imgur.com/a/${cached}` };
   }
 
   log.info("No cached mirror found");
@@ -43,7 +49,7 @@ async function _mirror(id: number, retry: boolean): Promise<string | null> {
   // Only NSFW content is behind an account wall, so only mirror that.
   if (!nsfw) {
     log.info("Post is not blocked by an account wall");
-    return null;
+    return { status: "sfw" };
   }
 
   const attribution = `Automatic mirror of https://pixiv.net/artworks/${id} by u/${process.env.REDDIT_USER}`;
@@ -63,7 +69,7 @@ async function _mirror(id: number, retry: boolean): Promise<string | null> {
 
   try {
     await cacheAlbum(id, album.id, album.deletehash);
-    return `https://imgur.com/a/${album.id}`;
+    return { status: "ok", album: `https://imgur.com/a/${album.id}` };
   } catch (e) {
     // Something went wrong, clean up and abort.
     imgur.deleteAlbum(album.deletehash);
@@ -77,7 +83,7 @@ async function _mirror(id: number, retry: boolean): Promise<string | null> {
       log.error("Unable to cache album", e);
     }
 
-    return null;
+    return { status: "failed" };
   }
 }
 
@@ -86,8 +92,8 @@ async function _mirror(id: number, retry: boolean): Promise<string | null> {
  *
  * @param id The ID of the post to mirror.
  *
- * @returns The url of the newly created Imgur mirror.
+ * @returns The newly created Imgur mirror.
  */
-export default async function mirror(id: number): Promise<string | null> {
+export default async function mirror(id: number): Promise<PixivMirror> {
   return await _mirror(id, false);
 }
