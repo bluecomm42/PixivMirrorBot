@@ -20,7 +20,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "bull-arena": "^3.10.0",
-    "bullmq": "^1.14.7",
+    "bullmq": "^1.14.8",
     "cls-hooked": "^4.2.2",
     "dotenv": "^8.2.0",
     "ent": "^2.2.0",
@@ -31,7 +31,7 @@
     "ioredis": "^4.23.0",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
-    "pixiv-app-api": "bluecomm42/pixiv-app-api",
+    "pixiv-app-api": "bluecomm42/pixiv-app-api#4b71a815e4e6b0080cdb43c1bcd775359acff41d",
     "snoostorm": "^1.5.2",
     "snoowrap": "^1.22.0",
     "split": "^1.0.1",
@@ -41,18 +41,18 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.33",
-    "@types/bull-arena": "^3.0.2",
+    "@types/bull-arena": "^3.0.3",
     "@types/cls-hooked": "^4.3.3",
     "@types/ent": "^2.2.3",
     "@types/express": "^4.17.11",
     "@types/logfmt": "^1.2.1",
     "@types/morgan": "^1.9.2",
-    "@types/pg": "^7.14.10",
+    "@types/pg": "^7.14.11",
     "@types/request": "^2.48.5",
     "@types/split": "^1.0.0",
     "@types/uuid": "^8.3.0",
     "@types/winston-syslog": "^2.0.3",
     "prettier": "^2.2.1",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.3"
   }
 }

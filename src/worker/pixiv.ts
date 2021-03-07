@@ -83,7 +83,6 @@ export async function illust(id: number): Promise<PixivPost> {
     title: illust.title,
     caption: formatCaption(illust.caption),
     urls: extractUrls(illust),
-    // @ts-expect-error: Pending akameco/pixiv-app-api#43
     nsfw: !!illust.xRestrict,
   };
 }

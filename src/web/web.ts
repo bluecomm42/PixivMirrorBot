@@ -21,7 +21,6 @@ const arena = Arena(
         type: "bullmq",
         name: queueName,
         hostId: process.env.REDDIT_USER,
-        // @ts-expect-error: Pending ISSUE TBD
         redis: connection,
       },
     ],
