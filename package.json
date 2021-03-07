@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "postinstall": "tsc",
+    "build": "tsc",
     "start-web": "node dist/web/main.js",
     "start-worker": "node dist/worker/main.js",
     "db-update": "node dist/db-update.js",
