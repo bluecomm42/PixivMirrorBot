@@ -33,7 +33,7 @@ const arena = Arena(
 
 const app = express();
 
-const stream = split().on("data", (msg) => logger.info(msg));
+const stream = split().on("data", msg => logger.info(msg));
 app.use(morgan("combined", { stream }));
 
 app.get("/", (req, res) => {
@@ -55,7 +55,7 @@ let server: Server;
  * Start the webserver.
  */
 export async function start(): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     server = app.listen(port, () => {
       logger.info(`Webserver started on port ${port}`);
       resolve();

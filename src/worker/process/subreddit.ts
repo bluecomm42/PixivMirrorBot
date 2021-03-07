@@ -28,7 +28,7 @@ export default async function processSubreddits(): Promise<void> {
     }
 
     // Process the subreddits
-    const names = subreddits.map((s) => s.display_name);
+    const names = subreddits.map(s => s.display_name);
     logger.info("Got subreddits", { names });
 
     // TODO: clsWrap?

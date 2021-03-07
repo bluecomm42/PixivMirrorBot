@@ -9,7 +9,8 @@
     "start-web": "node dist/web/main.js",
     "start-worker": "node dist/worker/main.js",
     "db-update": "node dist/db-update.js",
-    "watch-ts": "tsc -w"
+    "watch-ts": "tsc -w",
+    "lint": "prettier -c '**/*'"
   },
   "keywords": [],
   "author": "",
