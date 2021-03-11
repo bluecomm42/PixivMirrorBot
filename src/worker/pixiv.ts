@@ -19,8 +19,8 @@ interface PixivPost {
   caption: string;
   /** The image urls. */
   urls: string[];
-  /** Whether or not the post is 18+ */
-  nsfw: boolean;
+  /** Whether or not the requires an account to view. */
+  restricted: boolean;
 }
 
 /**
@@ -66,6 +66,19 @@ async function auth(): Promise<void> {
   authed = true;
 }
 
+function isRestricted(i: PixivIllust): boolean {
+  if (i.restrict) {
+    return true;
+  } else if (i.xRestrict) {
+    return true;
+  } else if (i.sanityLevel > 5) {
+    return true;
+  } else {
+    logger.info(`Found unrestricted post ${i.id} (sanity ${i.sanityLevel})`);
+    return false;
+  }
+}
+
 /**
  * Extract relevant information from a Pixiv post.
  *
@@ -83,7 +96,7 @@ export async function illust(id: number): Promise<PixivPost> {
     title: illust.title,
     caption: formatCaption(illust.caption),
     urls: extractUrls(illust),
-    nsfw: !!illust.xRestrict,
+    restricted: isRestricted(illust),
   };
 }
 

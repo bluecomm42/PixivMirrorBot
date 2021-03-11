@@ -5,7 +5,7 @@ import { getAlbum, cacheAlbum } from "../common/database.js";
 
 const logger = sublog("mirror");
 
-export type PixivStatuses = "ok" | "sfw" | "failed";
+export type PixivStatuses = "ok" | "unrestricted" | "failed";
 export interface PixivMirror {
   status: PixivStatuses;
   album?: string;
@@ -44,12 +44,12 @@ async function _mirror(id: number, retry: boolean): Promise<PixivMirror> {
   }
 
   log.info("No cached mirror found");
-  const { title, caption, urls, nsfw } = await pixiv.illust(id);
+  const { title, caption, urls, restricted } = await pixiv.illust(id);
 
   // Only NSFW content is behind an account wall, so only mirror that.
-  if (!nsfw) {
+  if (!restricted) {
     log.info("Post is not blocked by an account wall");
-    return { status: "sfw" };
+    return { status: "unrestricted" };
   }
 
   const attribution = `Automatic mirror of https://pixiv.net/artworks/${id} by u/${process.env.REDDIT_USER}`;

@@ -47,14 +47,14 @@ export async function mirrorComment(comment: Comment): Promise<Mirror> {
       case "ok":
         albums.push(mirror.album);
         break;
-      case "sfw":
+      case "unrestricted":
       default:
         continue;
     }
   }
 
-  // If all of the posts we tried to mirror were sfw, reflect that.
-  const status = mirrors.length === 0 ? "only sfw" : "ok";
+  // If all of the posts we tried to mirror were unrestricted, reflect that.
+  const status = albums.length === 0 ? "only unrestricted" : "ok";
   return { status, albums };
 }
 

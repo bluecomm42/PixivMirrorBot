@@ -1,6 +1,6 @@
 import { Comment, Submission } from "snoowrap";
 
-export type Statuses = "ok" | "no match" | "only sfw" | "error";
+export type Statuses = "ok" | "no match" | "only unrestricted" | "error";
 export interface Mirror {
   status: Statuses;
   albums: string[];

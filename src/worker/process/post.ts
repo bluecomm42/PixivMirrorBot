@@ -56,8 +56,8 @@ export async function mirrorPost(post: Submission): Promise<Mirror> {
   switch (status) {
     case "ok":
       return { status: "ok", albums: [album] };
-    case "sfw":
-      return { status: "only sfw", albums: [] };
+    case "unrestricted":
+      return { status: "only unrestricted", albums: [] };
     case "failed":
       return { status: "error", albums: [] };
   }
