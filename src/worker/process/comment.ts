@@ -90,7 +90,7 @@ export default async function processComment(commentId: string): Promise<void> {
     return;
   }
 
-  const msg = buildComment(albums);
+  const msg = buildComment(albums, comment.permalink);
   // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
   const reply = await comment.reply(msg);
   log.info("Successfuly replied to post", { replyId: reply.id });

@@ -52,26 +52,25 @@ export async function alreadyReplied<T>(
   return r.some(myComment);
 }
 
-export function buildDmSubject(): string {
-  let subject = "Bot Error";
+export function buildDmMessage(contextUrl: string): string {
+  let message = `[Context](${contextUrl})`;
   let trace = getTraceUUID();
-  if (trace) {
-    subject += ` (trace: ${trace})`;
-  }
-  return subject;
+  if (trace) message += ` (trace: ${trace})`;
+  return message;
 }
 
-function getFooterLinks(): string {
-  const subject = encodeURIComponent(buildDmSubject());
+function getFooterLinks(contextUrl: string): string {
+  const message = encodeURIComponent(buildDmMessage(contextUrl));
   const links = [
-    `[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=${subject}`,
+    `[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=Bot%20Error&message=${message}`,
     "[github]: https://github.com/",
   ];
   return links.join("\n");
 }
 
-export function addFooter(msg: string): string {
-  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n${getFooterLinks()}`;
+export function addFooter(msg: string, contextUrl: string): string {
+  const links = getFooterLinks(contextUrl);
+  return `${msg}\n\n---\n^(Beep boop, I'm a bot. This action was performed automatically. | Did I do something wrong? [Message my creator][bot-error] | Check out my source code on [GitHub][github]!)\n\n${links}`;
 }
 
 /**
@@ -81,7 +80,7 @@ export function addFooter(msg: string): string {
  *
  * @returns The final comment.
  */
-export function buildComment(albums: string[]): string {
+export function buildComment(albums: string[], contextUrl: string): string {
   let msg = "";
   if (albums.length === 1) {
     msg = `I noticed you linked to an 18+ Pixiv post. Those require a Pixiv account to view, so [here](${albums[0]}) is a mirror.`;
@@ -92,7 +91,7 @@ export function buildComment(albums: string[]): string {
     }
   }
 
-  return addFooter(msg);
+  return addFooter(msg, contextUrl);
 }
 
 /**
@@ -102,9 +101,9 @@ export function buildComment(albums: string[]): string {
  *
  * @returns The final comment.
  */
-export function buildRemovalComment(album: string): string {
+export function buildRemovalComment(album: string, contextUrl: string): string {
   let msg = `Directly linking to 18+ Pixiv posts is not allowed because they require a Pixiv account to view. Please make a new post from [this mirror](${album}) instead.`;
-  return addFooter(msg);
+  return addFooter(msg, contextUrl);
 }
 
 export function buildMentionReply(

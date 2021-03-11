@@ -1,12 +1,14 @@
 import { Job } from "bullmq";
 import client from "./client.js";
-import { buildDmSubject, mdCodeBlock } from "./util.js";
+import { getTraceUUID } from "./logger.js";
+import { mdCodeBlock } from "./util.js";
 
 export default async function sendDM(msg: string): Promise<void> {
+  let trace = getTraceUUID();
   await client.composeMessage({
     to: "bluecomm403",
-    subject: buildDmSubject(),
-    text: msg,
+    subject: "",
+    text: msg + `\n\n---\n\nTrace: ${trace}`,
   });
 }
 

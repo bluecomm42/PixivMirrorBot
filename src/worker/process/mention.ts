@@ -79,5 +79,5 @@ export default async function processMention(commentId: string): Promise<void> {
   }
 
   const msg = await _processMention(mention, log);
-  mention.reply(addFooter(msg));
+  mention.reply(addFooter(msg, mention.permalink));
 }

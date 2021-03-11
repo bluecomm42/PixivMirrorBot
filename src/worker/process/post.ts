@@ -94,7 +94,9 @@ export default async function processPost(postId: string): Promise<void> {
   const album = albums[0];
 
   const { remove, distinguish, sticky } = await getActions(post);
-  const msg = remove ? buildRemovalComment(album) : buildComment([album]);
+  const msg = remove
+    ? buildRemovalComment(album, post.permalink)
+    : buildComment([album], post.permalink);
   // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
   const reply = await post.reply(msg);
   log.info("Successfuly replied to post", { replyId: reply.id });
