@@ -71,7 +71,7 @@ function isRestricted(i: PixivIllust): boolean {
     return true;
   } else if (i.xRestrict) {
     return true;
-  } else if (i.sanityLevel > 5) {
+  } else if (i.sanityLevel > 3) {
     return true;
   } else {
     logger.info(`Found unrestricted post ${i.id} (sanity ${i.sanityLevel})`);
