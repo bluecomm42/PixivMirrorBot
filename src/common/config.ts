@@ -11,6 +11,9 @@ if (inDebug) {
   dotenv.config();
 }
 
+export const disabledMsg = process.env.DISABLED_MSG;
+export const disabled = !!disabledMsg;
+
 export const maxPageSize = 200;
 export const pollInterval = 10 * 60 * 1000; // Check every 10 minutes.
 export const queueName = "to-process";

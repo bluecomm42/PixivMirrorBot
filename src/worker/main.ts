@@ -1,4 +1,9 @@
-import { inProduction, queueName, version } from "../common/config.js";
+import {
+  disabled,
+  inProduction,
+  queueName,
+  version,
+} from "../common/config.js";
 import logger, { clsWrap } from "../common/logger.js";
 import processSubreddits from "./process/subreddit.js";
 import processInbox from "./process/inbox.js";
@@ -52,8 +57,17 @@ async function _processJob(job: Job) {
   }
 }
 
+// Process these even when disabled so the mentioner still gets a reply.
+const disabledJobWhitelist = ["process-inbox", "process-mention"];
+
 async function processJob(job: Job) {
   const log = logger.child({ job: { name: job.name, id: job.id } });
+
+  if (disabled && !disabledJobWhitelist.includes(job.name)) {
+    log.info("Skipping job because the bot is disabled.");
+    return;
+  }
+
   try {
     log.info("Processing job");
     await _processJob(job);

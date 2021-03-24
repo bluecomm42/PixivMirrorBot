@@ -11,6 +11,7 @@ import {
 } from "../../common/util.js";
 import { isComment, isSubmission } from "../../common/types.js";
 import { Logger } from "winston";
+import { disabled, disabledMsg } from "../../common/config.js";
 
 // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
 async function getParent(comment: Comment): Promise<Comment | Submission> {
@@ -78,6 +79,15 @@ export default async function processMention(commentId: string): Promise<void> {
     return;
   }
 
-  const msg = await _processMention(mention, log);
-  mention.reply(addFooter(msg, mention.permalink));
+  if (disabled) {
+    const msg = disabledMsg + " [](#pmb-mark--disabled-msg)";
+    // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
+    await mention.reply(addFooter(msg, mention.permalink));
+    log.info("Replied to mention with disabled message.");
+  } else {
+    const msg = await _processMention(mention, log);
+    // @ts-expect-error: Pending not-an-aardvark/snoowrap#221
+    await mention.reply(addFooter(msg, mention.permalink));
+    log.info("Replied to mention.");
+  }
 }

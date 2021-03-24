@@ -1,4 +1,5 @@
 import { Comment, Listing, VoteableContent } from "snoowrap";
+import { disabled } from "./config.js";
 import { Timestamps, CombinedTimestamps } from "./database.js";
 import { getTraceUUID } from "./logger.js";
 import { Statuses } from "./types.js";
@@ -22,7 +23,13 @@ export const port = process.env.PORT || 8080;
  * @returns Whether or not the comment was made by this bot.
  */
 export function myComment(c: Comment): boolean {
-  return c.author.name.toLowerCase() === process.env.REDDIT_USER.toLowerCase();
+  // If the author is different, it's not our comment.
+  if (c.author.name.toLowerCase() !== process.env.REDDIT_USER.toLowerCase())
+    return false;
+
+  // If the comment was by us but it was made while disabled and we're not
+  // disabled anymore, let the bot re-reply.
+  return !disabled && c.body.includes("pmb-mark--disabled-msg");
 }
 
 /**
