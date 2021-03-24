@@ -69,14 +69,14 @@ export async function stop(): Promise<void> {
  */
 export async function getAlbum(id: number): Promise<string | null> {
   let log = logger.child({ action: "fetch album", pixiv_id: id });
-  log.info("Starting fetch");
+  log.debug("Starting fetch");
   const query = "SELECT album_id FROM mirrors WHERE id = $1";
   const res = await pool.query(query, [id]);
   if (res.rows.length === 0) {
-    log.info("Fetch failed");
+    log.debug("Fetch failed");
     return null;
   } else {
-    log.info("Fetch succeeded");
+    log.debug("Fetch succeeded");
     return res.rows[0].album_id;
   }
 }
@@ -99,11 +99,11 @@ export async function cacheAlbum(
     albumId,
     deletehash,
   });
-  log.info("Saving to database");
+  log.debug("Saving to database");
   const query =
     "INSERT INTO mirrors(id, album_id, deletehash) VALUES ($1, $2, $3)";
   await pool.query(query, [id, albumId, deletehash]);
-  log.info("Saved");
+  log.debug("Saved");
 }
 
 function buildPlaceholderList(length: number, start = 1, seperator = ", ") {
@@ -171,7 +171,7 @@ export async function getLastTimestamps(
 ): Promise<CombinedTimestamps> {
   subreddits = subreddits.sort();
   let log = logger.child({ action: "fetch post timestamps", subreddits });
-  log.info("Starting fetch");
+  log.debug("Starting fetch");
   const placeholders = buildPlaceholderList(subreddits.length);
   const query = `SELECT name, last_post, last_comment FROM subreddits WHERE name IN (${placeholders}) ORDER BY name ASC`;
   const res = await pool.query(query, subreddits);
@@ -187,7 +187,7 @@ export async function getLastTimestamps(
     }
   }
 
-  log.info("Fetch succeeded", { timestamps: o });
+  log.debug("Fetch succeeded", { timestamps: o });
   return o;
 }
 
@@ -195,14 +195,14 @@ export async function saveLastTimestamps(
   timestamps: CombinedTimestamps
 ): Promise<void> {
   let log = logger.child({ action: "store post timestamps" });
-  log.info("Saving to database", { timestamps });
+  log.debug("Saving to database", { timestamps });
 
   const ts = [];
   for (const sub in timestamps) {
     ts.push([sub, timestamps[sub].post, timestamps[sub].comment]);
   }
   if (ts.length === 0) {
-    log.info("No input data");
+    log.debug("No input data");
     return;
   }
 
@@ -213,30 +213,30 @@ export async function saveLastTimestamps(
     (o, n) => `GREATEST(${o}, ${n})`
   );
   await pool.query(query, ts.flat());
-  log.info("Saved");
+  log.debug("Saved");
 }
 
 export async function getConfig(key: string): Promise<string | null> {
   let log = logger.child({ action: "fetch config", key: key });
-  log.info("Starting fetch");
+  log.debug("Starting fetch");
   const query = "SELECT data FROM misc WHERE id = $1";
   const res = await pool.query(query, [key]);
   if (res.rows.length === 0) {
-    log.info("Fetch failed");
+    log.debug("Fetch failed");
     return null;
   } else {
-    log.info("Fetch succeeded");
+    log.debug("Fetch succeeded");
     return res.rows[0].data;
   }
 }
 
 export async function setConfig(key: string, data: string): Promise<void> {
   let log = logger.child({ action: "store config", key, data });
-  log.info("Saving to database");
+  log.debug("Saving to database");
   const query =
     "INSERT INTO misc(id, data) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET data = $2";
   await pool.query(query, [key, data]);
-  log.info("Saved");
+  log.debug("Saved");
 }
 
 export async function getLastRun(fallback = 0): Promise<number> {
