@@ -1,5 +1,6 @@
 import {
   disabled,
+  disabledMsg,
   inProduction,
   queueName,
   version,
@@ -16,6 +17,7 @@ import Bluebird from "bluebird";
 import processMention from "./process/mention.js";
 
 logger.info(`Starting PixivMirrorBot worker v${version}`);
+if (disabled) logger.info(`Bot disabled with message '${disabledMsg}'`);
 
 const scheduler = new QueueScheduler(queueName, { connection });
 // Process subreddits every 5 minutes.
