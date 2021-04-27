@@ -1,4 +1,4 @@
-import { Comment, Listing, VoteableContent } from "snoowrap";
+import { Comment, Listing, Submission, VoteableContent } from "snoowrap";
 import { disabled } from "./config.js";
 import { Timestamps, CombinedTimestamps } from "./database.js";
 import { getTraceUUID } from "./logger.js";
@@ -42,6 +42,13 @@ export function myComment(c: Comment): boolean {
 export function mentionsMe(c: Comment): boolean {
   const mention = `u/${process.env.REDDIT_USER}`.toLowerCase();
   return c.body.toLowerCase().includes(mention);
+}
+
+export function ignoredUser(itm: Comment | Submission): boolean {
+  // TODO: Allow subreddits to add their own ignore lists.
+  // TODO: Allow users to opt-out globally.
+  const username = itm.author.name.toLowerCase();
+  return username === "2dgt3d";
 }
 
 /**

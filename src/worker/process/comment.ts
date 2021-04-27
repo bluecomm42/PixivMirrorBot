@@ -10,6 +10,7 @@ import {
   myComment,
   mentionsMe,
   regexBase,
+  ignoredUser,
 } from "../../common/util.js";
 import { Comment } from "snoowrap";
 import { Mirror } from "../../common/types.js";
@@ -72,6 +73,10 @@ export default async function processComment(commentId: string): Promise<void> {
   }
   if (comment.archived) {
     log.info("Comment is archived, ignoring");
+    return;
+  }
+  if (ignoredUser(comment)) {
+    log.info("Comment was made by an ignored user, ignoring");
     return;
   }
   if (await alreadyReplied(comment)) {
