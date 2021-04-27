@@ -44,11 +44,18 @@ export function mentionsMe(c: Comment): boolean {
   return c.body.toLowerCase().includes(mention);
 }
 
-export function ignoredUser(itm: Comment | Submission): boolean {
+/**
+ * Checks whether or not the item was made by an ignored user.
+ *
+ * @param cmnt The comment to check.
+ *
+ * @returns Whether or not the author is ignored.
+ */
+export function ignoredUser(cmnt: Comment): boolean {
   // TODO: Allow subreddits to add their own ignore lists.
   // TODO: Allow users to opt-out globally.
-  const username = itm.author.name.toLowerCase();
-  return username === "2dgt3d";
+  const ignored = ["2dgt3d"];
+  return myComment(cmnt) || ignored.includes(cmnt.author.name.toLowerCase());
 }
 
 /**

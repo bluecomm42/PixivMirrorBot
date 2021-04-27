@@ -7,7 +7,6 @@ import {
   alreadyReplied,
   buildComment,
   dedupe,
-  myComment,
   mentionsMe,
   regexBase,
   ignoredUser,
@@ -67,16 +66,12 @@ export default async function processComment(commentId: string): Promise<void> {
   const comment: Comment = await client.getComment(commentId).fetch();
 
   // Ignore any comments made by this bot to avoid accidental loops.
-  if (myComment(comment)) {
-    log.info("Comment was made by me, ignoring");
+  if (ignoredUser(comment)) {
+    log.info("Comment was made by an ignored user, ignoring");
     return;
   }
   if (comment.archived) {
     log.info("Comment is archived, ignoring");
-    return;
-  }
-  if (ignoredUser(comment)) {
-    log.info("Comment was made by an ignored user, ignoring");
     return;
   }
   if (await alreadyReplied(comment)) {
