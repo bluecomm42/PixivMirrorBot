@@ -84,7 +84,7 @@ function getFooterLinks(contextUrl: string): string {
   const message = encodeURIComponent(buildDmMessage(contextUrl));
   const links = [
     `[bot-error]: https://www.reddit.com/message/compose/?to=bluecomm403&subject=Bot%20Error&message=${message}`,
-    "[github]: https://github.com/",
+    "[github]: https://github.com/bluecomm42/PixivMirrorBot",
   ];
   return links.join("\n");
 }
