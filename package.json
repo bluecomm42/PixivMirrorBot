@@ -7,6 +7,7 @@
   "scripts": {
     "prepare": "husky install",
     "build": "tsc",
+    "start": "npm run db-update && npm run start-worker",
     "start-web": "node dist/web/main.js",
     "start-worker": "node dist/worker/main.js",
     "db-update": "node dist/db-update.js",
