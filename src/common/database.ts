@@ -5,7 +5,7 @@ import pg from "pg";
 const logger = sublog("database");
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URI,
+  connectionString: process.env.DATABASE_URL,
   // ssl: { rejectUnauthorized: false },
 });
 
